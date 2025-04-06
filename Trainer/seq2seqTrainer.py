@@ -1,7 +1,6 @@
-from abc import ABC, abstractmethod
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoModel, AdamW, get_linear_schedule_with_warmup
+from transformers import AutoTokenizer, AutoModel, get_linear_schedule_with_warmup, get_cosine_schedule_with_warmup, get_constant_schedule
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 from Trainer.trainer import Trainer
 from utils.utils import clean_memory
 from tqdm import tqdm
@@ -11,13 +10,13 @@ class Seq2SeqTrainer(Trainer):
         self, 
         model: AutoModel, 
         tokenizer: AutoTokenizer,
-        optimizer,
-        scheduler,
+        optimizer: torch.optim.Optimizer,
+        scheduler: torch.optim.lr_scheduler,
         early_stopping,
-        criterion,
-        train_dataset,
-        test_dataset,
-        val_dataset,
+        criterion: torch.nn.modules.loss,
+        train_dataset: Dataset,
+        test_dataset: Dataset,
+        val_dataset: Dataset,
         batch_size: int = 32,
         epochs: int = 3,
         learning_rate: float = 5e-5,

@@ -1,6 +1,6 @@
 import unittest
 from NeuralSpellChecker import NeuralSpellChecker
-from Models.Mbart50LargeModel import Mbart50LargeModel
+from Models.Mbart50Model import Mbart50LargeModel
 from InvalidModelException import InvalidModelException
 
 class NeuralSpellCheckerTest(unittest.TestCase):

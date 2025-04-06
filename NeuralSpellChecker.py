@@ -1,6 +1,6 @@
 from ModelEnum import ModelEnum
-from InvalidModelException import InvalidModelException
-from EvaluateModelException import EvaluateModelException
+from Exceptions.InvalidModelException import InvalidModelException
+from Exceptions.EvaluateModelException import EvaluateModelException
 
 class NeuralSpellChecker:
 
@@ -27,9 +27,11 @@ class NeuralSpellChecker:
 
 
     ### Helper functions
-
     def get_tokenizer(self):
         return self.tokenizer
     
     def get_model(self):
         return self.model
+    
+    def get_model_name(self):
+        return self.modelClassInstance.get_model_name()
