@@ -1,13 +1,6 @@
 from enum import Enum
 from typing import Dict, Type
 
-from Models.Llama31BaseModel import Llama31BaseModel
-from Models.Mbart50Model import Mbart50LargeModel
-from Models.Mt5BaseModel import Mt5BaseModel
-from Models.SinBertLargeModel import SinBertLargeModel
-from Models.XlmrBaseModel import XlmrBaseModel
-# Import other model classes as needed
-
 class ModelEnum(Enum):
     """
     Enum class for all the models supported by the 
@@ -58,6 +51,13 @@ class ModelEnum(Enum):
 
     @staticmethod
     def getModelClass(modelEnum):
+        from Models.Llama31BaseModel import Llama31BaseModel
+        from Models.Mbart50Model import Mbart50LargeModel
+        from Models.Mt5BaseModel import Mt5BaseModel
+        from Models.SinBertLargeModel import SinBertLargeModel
+        from Models.XlmrBaseModel import XlmrBaseModel
+        # Import other model classes as needed
+
         modelClasses: Dict[ModelEnum, Type] = {
             ModelEnum.LLAMA_31_8B: Llama31BaseModel,
             ModelEnum.MBART50: Mbart50LargeModel,
