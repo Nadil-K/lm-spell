@@ -1,6 +1,7 @@
 from Models.ModelAbstract import ModelAbstract
+from ModelEnum import ModelEnum
 class Llama31BaseModel(ModelAbstract):
-    def __init__(self, model_name=get_model_names("llama3.1-8b")):
+    def __init__(self, model_name=ModelEnum.LLAMA_31_8B):
         self.model_name = model_name
         pass
         
