@@ -60,7 +60,7 @@ class ModelEnum(Enum):
     def getModelClass(modelEnum):
         modelClasses: Dict[ModelEnum, Type] = {
             ModelEnum.LLAMA_31_8B: Llama31BaseModel,
-            ModelEnum.MBART50_LARGE: Mbart50LargeModel,
+            ModelEnum.MBART50: Mbart50LargeModel,
             ModelEnum.MT5_BASE: Mt5BaseModel,
             ModelEnum.XLMR_BASE: XlmrBaseModel,
             ModelEnum.SINBERT_LARGE: SinBertLargeModel,
