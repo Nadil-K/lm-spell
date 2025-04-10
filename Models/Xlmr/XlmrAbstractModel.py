@@ -1,8 +1,8 @@
 from Models.ModelAbstract import ModelAbstract
 
-class SinBertLargeModel(ModelAbstract):
+class XlmrAbstractModel(ModelAbstract):
     def __init__(self):
-        print('SinBert Large Model')
+        print('XLMR Base Model')
 
     def check(self, text):
         pass

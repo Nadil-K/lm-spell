@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from Exceptions.EvaluateModelException import EvaluateModelException
 
 class ModelAbstract(ABC):
-    def __init__(self, from_pretrained):
+    def __init__(self):
         self.tokenizer = None
         self.model = None
         pass

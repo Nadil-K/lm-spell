@@ -1,7 +1,9 @@
 from Models.ModelAbstract import ModelAbstract
 from ModelEnum import ModelEnum
-class Llama31BaseModel(ModelAbstract):
-    def __init__(self, from_pretrained=False):
+
+class LlamaAbstractModel(ModelAbstract):
+    def __init__(self):
+        # TODO
         self.model = ModelEnum.MT5_LARGE
         self.tokenizer = "Tokenizer for mT5-large"
         print('mT5 Large Model')

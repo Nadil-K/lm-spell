@@ -1,11 +1,12 @@
 from Models.ModelAbstract import ModelAbstract
 from ModelEnum import ModelEnum
 
-class Mbart50LargeModel(ModelAbstract):
-    def __init__(self, from_pretrained=False):
-        self.model = ModelEnum.MBART50
-        self.tokenizer = "Tokenizer for MBART50"
-        print('MBART50 Large Model')
+class GemmaAbstractModel(ModelAbstract):
+    def __init__(self):
+        # TODO
+        self.model = ModelEnum.MT5_LARGE
+        self.tokenizer = "Tokenizer for mT5-large"
+        print('mT5 Large Model')
 
     def correct(self, text):
         pass
