@@ -1,7 +1,7 @@
-from Models.ModelAbstract import ModelAbstract
+from Models.DecoderAbstract import DecoderAbstract
 from ModelEnum import ModelEnum
 
-class GemmaAbstractModel(ModelAbstract):
+class GemmaAbstractModel(DecoderAbstract):
     def __init__(self):
         # TODO
         self.model = ModelEnum.MT5_LARGE

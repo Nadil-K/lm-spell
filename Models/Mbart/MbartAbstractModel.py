@@ -1,7 +1,7 @@
-from Models.ModelAbstract import ModelAbstract
+from Models.EncoderDecoderAbstract import EncoderDecoderAbstract
 from ModelEnum import ModelEnum
 
-class MbartAbstractModel(ModelAbstract):
+class MbartAbstractModel(EncoderDecoderAbstract):
     def __init__(self):
         self.model = ModelEnum.MBART50
         self.tokenizer = "Tokenizer for MBART50"

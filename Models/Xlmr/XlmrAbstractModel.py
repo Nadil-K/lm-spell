@@ -1,6 +1,6 @@
-from Models.ModelAbstract import ModelAbstract
+from Models.EncoderAbstract import EncoderAbstract
 
-class XlmrAbstractModel(ModelAbstract):
+class XlmrAbstractModel(EncoderAbstract):
     def __init__(self):
         print('XLMR Base Model')
 

@@ -1,6 +1,6 @@
-from Models.ModelAbstract import ModelAbstract
+from Models.EncoderAbstract import EncoderAbstract
 
-class SinBertAbstractModel(ModelAbstract):
+class SinBertAbstractModel(EncoderAbstract):
     def __init__(self):
         print('SinBert Large Model')
 

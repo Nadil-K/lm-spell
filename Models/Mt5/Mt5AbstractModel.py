@@ -1,8 +1,9 @@
-from Models.ModelAbstract import ModelAbstract
+from Models.EncoderDecoderAbstract import EncoderDecoderAbstract
 
-class Mt5AbstractModel(ModelAbstract):
+class Mt5AbstractModel(EncoderDecoderAbstract):
     def __init__(self):
-        super().__init__()
+        self.model = None
+        self.tokenizer = None
         
     def correct(self, text):
         pass
