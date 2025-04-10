@@ -4,15 +4,15 @@ from Exceptions.EvaluateModelException import EvaluateModelException
 
 class NeuralSpellChecker:
 
-    def __init__(self, model, from_pretrained=False):
+    def __init__(self, model):
         
         try: 
             modelEnum = ModelEnum(model)
         except ValueError:
             raise InvalidModelException(f"Invalid model: {model}") from None
 
-        modelClass = ModelEnum.getModelClass(modelEnum)
-        self.modelClassInstance = modelClassInstance = modelClass(from_pretrained)
+        modelClass = modelEnum.getModelClass()
+        self.modelClassInstance = modelClassInstance = modelClass()
 
         self.model = modelClassInstance.model
         self.tokenizer = modelClassInstance.tokenizer
