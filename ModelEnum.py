@@ -57,6 +57,7 @@ class ModelEnum(Enum):
         from Models.Llama.LlamaAbstractModel import LlamaAbstractModel
         from Models.Gemma.GemmaAbstractModel import GemmaAbstractModel
         from Models.Mt5.Mt5AbstractModel import Mt5AbstractModel
+        from Models.Mt5.Mt5LargeModel import Mt5LargeModel
         from Models.Mbart.MbartAbstractModel import MbartAbstractModel
         from Models.SinBert.SinBertAbstractModel import SinBertAbstractModel
         from Models.Xlmr.XlmrAbstractModel import XlmrAbstractModel
@@ -91,7 +92,7 @@ class ModelEnum(Enum):
             # mT5 models
             ModelEnum.MT5_SMALL: Mt5AbstractModel,
             ModelEnum.MT5_BASE: Mt5AbstractModel,
-            ModelEnum.MT5_LARGE: Mt5AbstractModel,
+            ModelEnum.MT5_LARGE: Mt5LargeModel,
             ModelEnum.MT5_XL: Mt5AbstractModel,
             ModelEnum.MT5_XXL: Mt5AbstractModel,
 

@@ -1,13 +1,13 @@
 import unittest
 from ModelEnum import ModelEnum
 from Models.Llama.LlamaAbstractModel import LlamaAbstractModel
-from Models.Mt5.Mt5AbstractModel import Mt5AbstractModel
+from Models.Mt5.Mt5LargeModel import Mt5LargeModel
 
 class ModelEnumTest(unittest.TestCase):
 
     def test_gets_model_class(self):
         self.assertEqual(ModelEnum.getModelClass(ModelEnum.LLAMA31_FT_SI), LlamaAbstractModel)
-        self.assertEqual(ModelEnum.getModelClass(ModelEnum.MT5_LARGE), Mt5AbstractModel)
+        self.assertEqual(ModelEnum.getModelClass(ModelEnum.MT5_LARGE), Mt5LargeModel)
 
     def test_gets_model_name(self):
         self.assertEqual(ModelEnum.LLAMA31_FT_SI.get_model_path(), "surge-masks/llama-3.1-8b-ft-ssc")
