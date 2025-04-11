@@ -22,7 +22,7 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
                     outputs = self.model(input_ids=batch.input_ids, attention_mask=batch.attention_mask)
                 original = batch['input_ids']
                 prediction = torch.argmax(outputs.logits, dim=-1)
-                label = batch.get('labels') #this is only present when we are testing. its not there when we are predicting better to have a mechanism to prevet this
+                label = batch.get('labels') #this is only present when we are testing. its not there when we are predicting better to have a mechanism to prevent this
                 if batch.get('labels') is not None:
                     labels.extend(label)
                 originals.extend(original),  predictions.extend(prediction)
