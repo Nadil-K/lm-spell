@@ -28,6 +28,6 @@ jobs:
 
     - name: Run Unit Tests
       run: |
-        echo "PYTHONPATH is: $(pwd)"
+        cd neural-spell-checker-library  # move into the inner dir
         export PYTHONPATH=$(pwd)
         pytest -v
