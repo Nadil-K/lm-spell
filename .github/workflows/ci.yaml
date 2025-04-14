@@ -15,12 +15,15 @@ jobs:
     steps:
     - name: Check out repository
       uses: actions/checkout@v3
-      with:
-        path: neural-spell-checker-library
 
-    - name: Show current dir and files
+    - name: Flatten repository directory
       run: |
-        echo "PWD: $(pwd)"
+        echo "Before move:"
+        ls -la
+        mv neural-spell-checker-library/* .
+        mv neural-spell-checker-library/.* . 2>/dev/null || true
+        rm -rf neural-spell-checker-library
+        echo "After move:"
         ls -la
 
     - name: Set up Python
