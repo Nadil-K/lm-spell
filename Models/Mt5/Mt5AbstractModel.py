@@ -1,7 +1,7 @@
 from Models.EncoderDecoderAbstract import EncoderDecoderAbstract
 from Utils.PrePostProcessingUtils import PrePostProcessingUtils
 from Utils.ConfigUtils import ConfigUtils
-from Dsets.SeqSeqDataset import SeqSeqDataset
+from Datasets.SeqSeqDataset import SeqSeqDataset
 
 import torch
 import pandas as pd

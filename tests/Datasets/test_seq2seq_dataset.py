@@ -3,7 +3,7 @@ import pandas as pd
 import torch
 from unittest.mock import MagicMock
 
-from Dsets.SeqSeqDataset import SeqSeqDataset
+from Datasets.SeqSeqDataset import SeqSeqDataset
 
 @pytest.fixture
 def sample_df():
