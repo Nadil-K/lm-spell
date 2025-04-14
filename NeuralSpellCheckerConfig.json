@@ -1,0 +1,8 @@
+{
+    "dataset": {
+        "seq2seq" : {
+            "inputs": "text",
+            "targets": "expected"
+        }
+    }
+}
