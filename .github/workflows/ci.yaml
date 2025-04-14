@@ -27,8 +27,9 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Run Unit Tests
-      run: |
-        export PYTHONPATH=$(pwd)
-        echo PYTHONPATH: $PYTHONPATH
-        echo pwd: $(pwd)
-        pytest -v
+      run: python -m pytest
+      # run: |
+      #   export PYTHONPATH=$(pwd)
+      #   echo PYTHONPATH: $PYTHONPATH
+      #   echo pwd: $(pwd)
+      #   pytest -v
