@@ -1,7 +1,7 @@
 from Models.EncoderDecoderAbstract import EncoderDecoderAbstract
 from Utils.PrePostProcessingUtils import PrePostProcessingUtils
 from Utils.ConfigUtils import ConfigUtils
-from Datasets.Seq2SeqDataset import Seq2SeqDataset
+from Dsets.SeqSeqDataset import SeqSeqDataset
 
 import torch
 import pandas as pd
@@ -16,7 +16,7 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
             input_set = [input_set]
             batch_size = 1
 
-        dataset = Seq2SeqDataset(input_set, self.tokenizer, max_length)
+        dataset = SeqSeqDataset(input_set, self.tokenizer, max_length)
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
         self.model.eval()
         originals, predictions, labels = [], [], []
