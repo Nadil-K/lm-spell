@@ -28,5 +28,6 @@ jobs:
 
     - name: Run Unit Tests
       run: |
+        echo "PYTHONPATH is: $(pwd)"
         export PYTHONPATH=$(pwd):$(pwd)/..
         pytest
