@@ -6,7 +6,9 @@ from Models.Mt5.Mt5LargeModel import Mt5LargeModel
 @patch("Models.Mt5.Mt5LargeModel.T5TokenizerFast.from_pretrained")
 def test_initialize_model(mock_tokenizer, mock_model):
 
-    mock_model.return_value = MagicMock(name="mT5-large-mock")
+    mock_model_instance = MagicMock(name="mT5-large-mock")
+    mock_model_instance.to.return_value = mock_model_instance
+    mock_model.return_value = mock_model_instance
     mock_tokenizer.return_value = MagicMock(name="mT5-large-tokenizer-mock")
 
     instance = Mt5LargeModel()
