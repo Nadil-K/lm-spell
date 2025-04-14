@@ -1,5 +1,5 @@
-from torch.utils.data import DataLoader, Dataset
-from Utils.Config import Config
+from torch.utils.data import Dataset
+from Utils.ConfigUtils import ConfigUtils
 
 class Seq2SeqDataset(Dataset):
     def __init__(self, dataframe, tokenizer, max_length=128):
@@ -22,6 +22,6 @@ class Seq2SeqDataset(Dataset):
 
     @staticmethod
     def get_column_name(column: str, default: str = None):
-        config = Config()
+        config = ConfigUtils()
         return config.get(f"dataset.seq2seq.{column}", default)
         

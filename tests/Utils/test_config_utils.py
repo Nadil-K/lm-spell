@@ -1,5 +1,5 @@
 from unittest.mock import mock_open, patch
-from Utils.Config import Config
+from Utils.ConfigUtils import ConfigUtils
 import json
 
 def test_get_configs():
@@ -15,7 +15,7 @@ def test_get_configs():
     
     with patch("builtins.open", mock_open(read_data=mock_config_data)), patch("os.path.exists", return_value=True):
 
-        config = Config()
+        config = ConfigUtils()
         assert config.get('dataset.seq2seq.inputs') == 'text'
         assert config.get('dataset.seq2seq.targets') == 'expected'
         assert config.get('dataset.seq2seq.non_existing_key') is None

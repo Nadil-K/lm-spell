@@ -1,7 +1,8 @@
 import pytest
 import pandas as pd
 import torch
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+
 from Datasets.Seq2SeqDataset import Seq2SeqDataset
 
 @pytest.fixture

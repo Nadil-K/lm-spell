@@ -1,7 +1,7 @@
 import json
 import os
 
-class Config:
+class ConfigUtils:
 
     def __init__(self):
         if os.path.exists('NeuralSpellCheckerConfig.json'):
