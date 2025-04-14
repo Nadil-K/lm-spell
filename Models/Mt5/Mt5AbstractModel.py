@@ -2,7 +2,7 @@ from Models.EncoderDecoderAbstract import EncoderDecoderAbstract
 import torch
 from utils.data_utils import remove_special_tokens
 import pandas as pd
-from DataSets import Seq2SeqDataset
+from Datasets import Seq2SeqDataset
 from torch.utils.data import DataLoader
 import tqdm
 
