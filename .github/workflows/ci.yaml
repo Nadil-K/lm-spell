@@ -28,7 +28,7 @@ jobs:
 
     - name: Run Unit Tests
       run: |
+        export PYTHONPATH=$(pwd)
         echo PYTHONPATH: $PYTHONPATH
         echo pwd: $(pwd)
-        export PYTHONPATH=$(pwd)
         pytest -v
