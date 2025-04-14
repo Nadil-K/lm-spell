@@ -1,0 +1,13 @@
+{
+    "dataset": {
+        "seq2seq" : {
+            "inputs": "text",
+            "targets": "expected"
+        }
+    },
+    "results" : {
+        "original" : "Original",
+        "predicted" : "Corrected",
+        "expected" : "Expected"
+    }
+}

@@ -54,3 +54,11 @@ def load_data_from_hf(file_path, dataset_size=1):
         file_path = [file_path]
     for path in file_path:
         pass
+
+import torch
+def remove_special_tokens(tokens, all_special_ids, special_token_id_to_keep_tensor):
+    # print(f"Removing Special Tokens Except for {special_token_id_to_keep_tensor}")
+    tokens_tensor = torch.tensor(tokens.clone().detach(), dtype=torch.int64)
+    mask = (tokens_tensor == special_token_id_to_keep_tensor) | (~torch.isin(tokens_tensor, all_special_ids))
+    filtered_tokens = tokens_tensor[mask]
+    return filtered_tokens.tolist()

@@ -1,10 +1,18 @@
 from abc import ABC, abstractmethod
 from Exceptions.EvaluateModelException import EvaluateModelException
+import torch
 
 class ModelAbstract(ABC):
     @abstractmethod
     def __init__(self):
-        pass
+        '''
+        Conctrete classes should define following attributes:
+        - model_label
+        - model
+        - tokenizer
+        - exp_dir
+        '''
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     @abstractmethod
     def correct(self, text):
