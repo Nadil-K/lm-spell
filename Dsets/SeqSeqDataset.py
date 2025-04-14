@@ -1,7 +1,7 @@
 from torch.utils.data import Dataset
 from Utils.ConfigUtils import ConfigUtils
 
-class Seq2SeqDataset(Dataset):
+class SeqSeqDataset(Dataset):
     def __init__(self, dataframe, tokenizer, max_length=128):
         self.dataframe = dataframe
         self.tokenizer = tokenizer
