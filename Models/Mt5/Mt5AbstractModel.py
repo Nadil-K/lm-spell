@@ -76,7 +76,7 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
         results_df = pd.DataFrame(results_data)
 
         # When using BERT models, these character were present in the output. They throws errors when saving in excel format
-        results_df = results_df.applymap(lambda x: x.replace('.\uffff', '').replace('\x11', '') if isinstance(x, str) else x)
+        results_df = results_df.apply(lambda col: col.map(lambda x: x.replace('.\uffff', '').replace('\x11', '') if isinstance(x, str) else x))
 
         print("Replacing ZWJ token")
         for column in result_col_names:
