@@ -10,6 +10,8 @@ class ModelAbstract(ABC):
         - model_label
         - model
         - tokenizer
+        - seed
+        - max_seq_length
         - exp_dir
         '''
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
