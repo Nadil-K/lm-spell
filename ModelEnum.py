@@ -54,10 +54,9 @@ class ModelEnum(Enum):
     def getModelClass(self) -> ModelAbstract:
         """Return the model class associated with the enum value"""
 
-        from Models.Llama.LlamaAbstractModel import LlamaAbstractModel
-        from Models.Gemma.GemmaAbstractModel import GemmaAbstractModel
-        from Models.Mt5.Mt5AbstractModel import Mt5AbstractModel
-        from Models.Mt5.Mt5LargeModel import Mt5LargeModel
+        from Models.Llama import LlamaAbstractModel, Llama318BModel
+        from Models.Gemma import GemmaAbstractModel, Gemma29BModel
+        from Models.Mt5 import Mt5AbstractModel, Mt5LargeModel
         from Models.Mbart.MbartAbstractModel import MbartAbstractModel
         from Models.SinBert.SinBertAbstractModel import SinBertAbstractModel
         from Models.Xlmr.XlmrAbstractModel import XlmrAbstractModel
@@ -74,7 +73,7 @@ class ModelEnum(Enum):
             ModelEnum.XLMR_FT_SI: XlmrAbstractModel,
 
             # Llama 3.1 models
-            ModelEnum.LLAMA_31_8B: LlamaAbstractModel,
+            ModelEnum.LLAMA_31_8B: Llama318BModel,
             ModelEnum.LLAMA_31_8B_INSTRUCT: LlamaAbstractModel,
 
             # Llama 3.2 models
@@ -86,7 +85,7 @@ class ModelEnum(Enum):
             # Gemma 2 models
             ModelEnum.GEMMA_2_2B: GemmaAbstractModel,
             ModelEnum.GEMMA_2_2B_INSTRUCT: GemmaAbstractModel,
-            ModelEnum.GEMMA_2_9B: GemmaAbstractModel,
+            ModelEnum.GEMMA_2_9B: Gemma29BModel,
             ModelEnum.GEMMA_2_9B_INSTRUCT: GemmaAbstractModel,
 
             # mT5 models
