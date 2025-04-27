@@ -12,17 +12,15 @@ from Models.ModelAbstract import ModelAbstract
 # Make a fixture for the Llama318BModel with mocks
 @pytest.fixture(autouse=True, scope="module")
 def llama_model():
-    with patch("unsloth.FastLanguageModel.from_pretrained") as mock_from_pretrained, \
-        patch("unsloth.FastLanguageModel.for_inference") as mock_for_inference:
+    with patch("unsloth.FastLanguageModel.FastLanguageModel.from_pretrained") as mock_from_pretrained, \
+         patch("unsloth.FastLanguageModel.FastLanguageModel.for_inference") as mock_for_inference:
 
         mock_model = MagicMock()
         mock_tokenizer = MagicMock()
         mock_from_pretrained.return_value = (mock_model, mock_tokenizer)
 
-        # Mock generation_config and generate
         type(mock_model).generation_config = PropertyMock(return_value=MagicMock(get_generation_mode=lambda: "test_mode"))
         mock_model.generate.return_value = [MagicMock()]
-
         mock_tokenizer.decode.return_value = "corrected text"
 
         model = Llama318BModel()
