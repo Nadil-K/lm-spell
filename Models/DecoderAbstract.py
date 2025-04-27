@@ -1,10 +1,10 @@
 from Models.ModelAbstract import ModelAbstract
 
-from unsloth import FastLanguageModel
-
 class DecoderAbstract(ModelAbstract):
 
     def __init__(self):
+        from unsloth import FastLanguageModel
+
         super().__init__()
 
         model, tokenizer = FastLanguageModel.from_pretrained(
@@ -29,6 +29,7 @@ class DecoderAbstract(ModelAbstract):
                 
     def correct(self, text):        
         from tqdm import tqdm
+        from unsloth import FastLanguageModel
         
         if isinstance(text, str):
             text = [text]
