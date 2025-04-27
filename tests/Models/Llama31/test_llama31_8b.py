@@ -7,8 +7,8 @@ from Models.ModelAbstract import ModelAbstract
 # Make a fixture for the Llama318BModel with mocks
 @pytest.fixture
 def llama_model():
-    with patch("Models.DecoderAbstract.FastLanguageModel.from_pretrained") as mock_from_pretrained, \
-         patch("Models.DecoderAbstract.FastLanguageModel.for_inference") as mock_for_inference:
+    with patch("unsloth.FastLanguageModel.from_pretrained") as mock_from_pretrained, \
+        patch("unsloth.FastLanguageModel.for_inference") as mock_for_inference:
 
         mock_model = MagicMock()
         mock_tokenizer = MagicMock()
