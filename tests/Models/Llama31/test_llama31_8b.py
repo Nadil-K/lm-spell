@@ -10,7 +10,7 @@ from Models.DecoderAbstract import DecoderAbstract
 from Models.ModelAbstract import ModelAbstract
 
 # Make a fixture for the Llama318BModel with mocks
-@pytest.fixture
+@pytest.fixture(autouse=True, scope="module")
 def llama_model():
     with patch("unsloth.FastLanguageModel.from_pretrained") as mock_from_pretrained, \
         patch("unsloth.FastLanguageModel.for_inference") as mock_for_inference:
