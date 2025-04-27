@@ -1,5 +1,10 @@
 import pytest
+import sys
 from unittest.mock import patch, MagicMock, PropertyMock
+
+sys.modules["unsloth"] = MagicMock()
+sys.modules["unsloth.FastLanguageModel"] = MagicMock()
+
 from Models.Llama.Llama318BModel import Llama318BModel
 from Models.DecoderAbstract import DecoderAbstract
 from Models.ModelAbstract import ModelAbstract
