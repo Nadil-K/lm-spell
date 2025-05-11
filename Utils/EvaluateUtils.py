@@ -459,12 +459,8 @@ class EvaluateUtils:
         """
         Evaluate the model using a DataFrame containing source, predicted, and reference columns.
         """
-        config = ConfigUtils()
-        result_col_names = [
-            config.get('results.original', 'Original'),
-            config.get('results.predicted', 'Corrected'),
-            config.get('results.expected', 'Expected')
-        ]
+
+        result_col_names = ConfigUtils.get_results_columns()
 
         srcs = df[result_col_names[0]]
         preds = df[result_col_names[1]]
@@ -477,6 +473,7 @@ class EvaluateUtils:
         """
         Process the results DataFrame and save it to a CSV file.
         """
+
         results_file_path = f"{exp_dir}/evaluation_results.txt"
         with open(results_file_path, "w", encoding="utf-8") as file:
             for key, value in results.items():
