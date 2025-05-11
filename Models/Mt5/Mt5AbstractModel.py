@@ -2,6 +2,7 @@ from Models.EncoderDecoderAbstract import EncoderDecoderAbstract
 from Utils.PrePostProcessingUtils import PrePostProcessingUtils
 from Utils.ConfigUtils import ConfigUtils
 from Datasets.Seq2SeqDataset import Seq2SeqDataset
+from NeuralSpellCheckerException import NeuralSpellCheckerException
 
 import torch
 import pandas as pd
@@ -10,13 +11,11 @@ from torch.utils.data import DataLoader
 
 class Mt5AbstractModel(EncoderDecoderAbstract):
 
-    def correct(self, input_set: list[str] | str, max_length: int, batch_size: int, shuffle: bool):
-
+    def correct(self, input_set: list[str] | str | pd.DataFrame, max_length: int, batch_size: int, shuffle: bool):
         if isinstance(input_set, str):
             input_set = pd.DataFrame([{"text": input_set, "expected": ""}])
         elif isinstance(input_set, list) and isinstance(input_set[0], str):
             input_set = pd.DataFrame([{"text": s, "expected": ""} for s in input_set])
-
 
         dataset = Seq2SeqDataset(input_set, self.tokenizer, max_length)
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
@@ -85,3 +84,18 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
             results_df[column] = PrePostProcessingUtils.clean_zwj(results_df[column])
 
         PrePostProcessingUtils.save_dataframe(results_df, self.exp_dir)
+
+    def correctFromFile(self, src: str, max_length: int, batch_size: int, shuffle: bool):
+        """
+        Corrects the text from a file. The file should be in the format of
+        """
+        if src.endswith('.csv'):
+            input_set = pd.read_csv(src)
+        elif src.endswith('.txt'):
+            with open(src, 'r', encoding='utf-8') as file:
+                lines = file.readlines()
+            input_set = pd.DataFrame([{"text": line.strip(), "expected": ""} for line in lines])
+        else:
+            raise NeuralSpellCheckerException("Unsupported file format. Only .csv and .txt are supported.") from None
+                
+        return self.correct(input_set, max_length, batch_size, shuffle)

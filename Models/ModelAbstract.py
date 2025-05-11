@@ -21,7 +21,7 @@ class ModelAbstract(ABC):
         pass
 
     @abstractmethod
-    def correctFromFile(self, src):
+    def correctFromFile(self, src: str):
         pass
     
     @abstractmethod
