@@ -1,21 +1,39 @@
-from Models.EncoderDecoderAbstract import EncoderDecoderAbstract
-from Utils.PrePostProcessingUtils import PrePostProcessingUtils
-from Utils.ConfigUtils import ConfigUtils
-from Datasets.Seq2SeqDataset import Seq2SeqDataset
-from NeuralSpellCheckerException import NeuralSpellCheckerException
-
 import torch
 import pandas as pd
 from tqdm import tqdm
 from torch.utils.data import DataLoader
+from Utils.ConfigUtils import ConfigUtils
+from Utils.EvaluateUtils import EvaluateUtils
+from Datasets.Seq2SeqDataset import Seq2SeqDataset
+from Utils.PrePostProcessingUtils import PrePostProcessingUtils
+from Models.EncoderDecoderAbstract import EncoderDecoderAbstract
+from NeuralSpellCheckerException import NeuralSpellCheckerException
 
 class Mt5AbstractModel(EncoderDecoderAbstract):
 
-    def correct(self, input_set: list[str] | str | pd.DataFrame, max_length: int, batch_size: int, shuffle: bool):
+    def process_input(self, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None):
+        """
+        Process the input set and target set. The input set should be a list of strings or a DataFrame.
+        The target set should be a list of strings or a DataFrame.
+        """
+        evaluate_flag = True
         if isinstance(input_set, str):
-            input_set = pd.DataFrame([{"text": input_set, "expected": ""}])
+            if target_set is not None and isinstance(target_set, str):
+                input_set = pd.DataFrame([{"text": input_set, "expected": target_set}])
+            else:  
+                input_set = pd.DataFrame([{"text": input_set, "expected": ""}])
+                evaluate_flag = False
         elif isinstance(input_set, list) and isinstance(input_set[0], str):
-            input_set = pd.DataFrame([{"text": s, "expected": ""} for s in input_set])
+            if target_set is not None and isinstance(target_set, list) and len(target_set) == len(input_set):
+                input_set = pd.DataFrame([{"text": s, "expected": t} for s, t in zip(input_set, target_set)])
+            else:
+                input_set = pd.DataFrame([{"text": s, "expected": ""} for s in input_set])
+                evaluate_flag = False
+
+        return input_set, evaluate_flag
+
+    def correct(self, max_length: int, batch_size: int, shuffle: bool, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None):
+        input_set, evaluate_flag = self.process_input(input_set, target_set)
 
         dataset = Seq2SeqDataset(input_set, self.tokenizer, max_length)
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
@@ -33,7 +51,10 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
                     labels.extend(label)
                 originals.extend(original),  predictions.extend(prediction)
 
-        return self.decode(originals, predictions, labels)
+        results_df = self.decode(originals, predictions, labels)
+        if evaluate_flag:
+            EvaluateUtils.evaluate_from_dataframe(results_df, self.exp_dir)
+        return None
 
 
     def decode(self, originals, predictions, labels):
@@ -83,9 +104,13 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
         for column in result_col_names:
             results_df[column] = PrePostProcessingUtils.clean_zwj(results_df[column])
 
+        # TO-DO: Evaluate the model and save the results
+
         PrePostProcessingUtils.save_dataframe(results_df, self.exp_dir)
 
-    def correctFromFile(self, src: str, max_length: int, batch_size: int, shuffle: bool):
+        return results_df
+
+    def correctFromFile(self, max_length: int, batch_size: int, shuffle: bool, src: str, target: str = None):
         """
         Corrects the text from a file. The file should be in the format of
         """
@@ -93,9 +118,16 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
             input_set = pd.read_csv(src)
         elif src.endswith('.txt'):
             with open(src, 'r', encoding='utf-8') as file:
-                lines = file.readlines()
-            input_set = pd.DataFrame([{"text": line.strip(), "expected": ""} for line in lines])
+                src_lines = file.readlines()
+            if target is not None:
+                with open(target, 'r', encoding='utf-8') as file:
+                    target_lines = file.readlines()
+                if len(src_lines) != len(target_lines):
+                    raise NeuralSpellCheckerException("Source and target files must have the same number of lines.") from None
+                input_set = pd.DataFrame([{"text": src_line.strip(), "expected": target_line.strip()} for src_line, target_line in zip(src_lines, target_lines)])
+            else:
+                input_set = pd.DataFrame([{"text": src_line.strip(), "expected": ""} for src_line in src_lines])
         else:
             raise NeuralSpellCheckerException("Unsupported file format. Only .csv and .txt are supported.") from None
                 
-        return self.correct(input_set, max_length, batch_size, shuffle)
+        return self.correct(max_length, batch_size, shuffle, input_set)
