@@ -25,14 +25,6 @@ class ModelAbstract(ABC):
         pass
     
     @abstractmethod
-    def evaluate(self, src, target):
-        pass
-    
-    @abstractmethod
-    def evaluateFromFile(self, src_file, target_file):
-        pass
-    
-    @abstractmethod
     def load_model(self):
         pass
     
