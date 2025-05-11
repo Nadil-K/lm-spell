@@ -10,8 +10,7 @@ from torch.utils.data import DataLoader
 
 class Mt5AbstractModel(EncoderDecoderAbstract):
 
-    # this should be 'correct'
-    def predict(self, input_set: list[str] | str, max_length: int, batch_size: int, shuffle: bool):
+    def correct(self, input_set: list[str] | str, max_length: int, batch_size: int, shuffle: bool):
 
         if isinstance(input_set, str):
             input_set = pd.DataFrame([{"text": input_set, "expected": ""}])
