@@ -25,14 +25,14 @@ def mock_model():
 def test_predict_single_input(mock_tqdm_module, mock_model):
 
     mock_model.decode = MagicMock()
-    mock_model.correct("input example", max_length=10, batch_size=1, shuffle=False)
+    mock_model.correct(max_length=10, batch_size=1, shuffle=False, input_set="input example")
     mock_model.decode.assert_called_once()
 
 @patch("Models.Mt5.Mt5AbstractModel.tqdm")
 def test_predict_multiple_inputs(mock_tqdm_module, mock_model):
 
     mock_model.decode = MagicMock()
-    mock_model.correct(["Text A", "Text B"], max_length=10, batch_size=2, shuffle=False)
+    mock_model.correct(max_length=10, batch_size=2, shuffle=False, input_set=["Text A", "Text B"])
     mock_model.decode.assert_called_once()
 
 def test_decode_function(mock_model):
