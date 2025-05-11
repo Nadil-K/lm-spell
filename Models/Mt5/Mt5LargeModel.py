@@ -6,6 +6,8 @@ class Mt5LargeModel(Mt5AbstractModel):
     def __init__(self):
         super().__init__()
         self.model_label = ModelEnum.MT5_LARGE
+        # Replace
+        self.exp_dir = 'C:/Users/Tharusha/Documents/Desktop Removals/neural-spell-checker-library'
 
         model_path = self.model_label.get_model_path()
         self.model = MT5ForConditionalGeneration.from_pretrained(model_path).to(self.device)

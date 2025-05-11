@@ -5,7 +5,7 @@ from Datasets.Seq2SeqDataset import Seq2SeqDataset
 
 import torch
 import pandas as pd
-import tqdm
+from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 class Mt5AbstractModel(EncoderDecoderAbstract):
@@ -14,8 +14,10 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
     def predict(self, input_set: list[str] | str, max_length: int, batch_size: int, shuffle: bool):
 
         if isinstance(input_set, str):
-            input_set = [input_set]
-            batch_size = 1
+            input_set = pd.DataFrame([{"text": input_set, "expected": ""}])
+        elif isinstance(input_set, list) and isinstance(input_set[0], str):
+            input_set = pd.DataFrame([{"text": s, "expected": ""} for s in input_set])
+
 
         dataset = Seq2SeqDataset(input_set, self.tokenizer, max_length)
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
@@ -25,15 +27,15 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
         with tqdm(dataloader, leave=True) as pbar:
             for batch in pbar:
                 with torch.no_grad():
-                    outputs = self.model(input_ids=batch.input_ids, attention_mask=batch.attention_mask)
-                original = batch['input_ids']
+                    outputs = self.model(input_ids=batch["input_ids"], attention_mask=batch["attention_mask"], labels=batch["labels"])
+                original = batch["input_ids"]
                 prediction = torch.argmax(outputs.logits, dim=-1)
-                label = batch.get('labels') #this is only present when we are testing. its not there when we are predicting better to have a mechanism to prevent this
-                if batch.get('labels') is not None:
+                label = batch.get("labels") #this is only present when we are testing. its not there when we are predicting better to have a mechanism to prevent this
+                if batch.get("labels") is not None:
                     labels.extend(label)
                 originals.extend(original),  predictions.extend(prediction)
 
-        self.decode(originals, predictions, labels)
+        return self.decode(originals, predictions, labels)
 
 
     def decode(self, originals, predictions, labels):
