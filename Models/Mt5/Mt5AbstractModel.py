@@ -60,6 +60,7 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
         with tqdm(dataloader, leave=True) as pbar:
             for batch in pbar:
                 with torch.no_grad():
+                    batch = {k: v.to(self.device) for k, v in batch.items()}
                     outputs = self.model(input_ids=batch["input_ids"], attention_mask=batch["attention_mask"], labels=batch["labels"])
                 original = batch["input_ids"]
                 prediction = torch.argmax(outputs.logits, dim=-1)

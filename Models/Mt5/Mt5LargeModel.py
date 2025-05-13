@@ -13,6 +13,7 @@ class Mt5LargeModel(Mt5AbstractModel):
         model_path = self.model_label.get_model_path()
         self.model = MT5ForConditionalGeneration.from_pretrained(model_path).to(self.device)
         self.tokenizer = T5TokenizerFast.from_pretrained(model_path)
+        self.model.to(self.device)
     
     def evaluate(self, src, target):
         pass
