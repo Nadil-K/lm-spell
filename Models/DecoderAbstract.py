@@ -1,4 +1,8 @@
+import pandas as pd
+from Utils.ConfigUtils import ConfigUtils
+from Utils.EvaluateUtils import EvaluateUtils
 from Models.ModelAbstract import ModelAbstract
+from NeuralSpellCheckerException import NeuralSpellCheckerException
 
 class DecoderAbstract(ModelAbstract):
 
@@ -27,19 +31,21 @@ class DecoderAbstract(ModelAbstract):
         ### Output:
         {{}}"""
                 
-    def correct(self, text):        
+    def correct(self, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None):
+        import re        
         from tqdm import tqdm
         from unsloth import FastLanguageModel
         
-        if isinstance(text, str):
-            text = [text]
+        input_set, evaluate_flag = self.process_input(input_set, target_set)
+
+        dataset_col_names = ConfigUtils.get_dataset_columns()
         
         FastLanguageModel.for_inference(self.model) 
         pred_texts = []
         generation_mode = self.model.generation_config.get_generation_mode()
         print(f"Generation mode: {generation_mode}")
 
-        for src in tqdm(text, desc="Generating predictions"):
+        for src in tqdm(input_set[dataset_col_names[0]].to_list(), desc="Generating predictions"):
             inputs = self.tokenizer(
                 [self.PROMPT.format(src, "")],
                 return_tensors="pt"
@@ -50,3 +56,46 @@ class DecoderAbstract(ModelAbstract):
             pred_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
             pred_texts.append(pred_text)
+        
+        print(pred_texts)
+        output_texts = []
+        for pred in pred_texts:
+            match = re.search(r'### Output:\s*([^\n]+)', pred)
+            output_texts.append(match.group(1).strip() if match else None)
+
+        result_col_names = ConfigUtils.get_results_columns()
+
+        results_data = {
+            result_col_names[0]: input_set[dataset_col_names[0]].to_list(),
+            result_col_names[1]: output_texts
+        }
+
+        results_df = pd.DataFrame(results_data)
+
+        if evaluate_flag:
+            results_df[result_col_names[2]] = input_set[dataset_col_names[1]].to_list()
+            print(results_df.columns)
+            print("Evaluating the outputs...")
+            EvaluateUtils.evaluate_from_dataframe(results_df, self.exp_dir)            
+
+        return results_df
+
+    def correctFromFile(self, src: str, target: str = None, evaluate_flag: bool = False):
+        import pandas as pd
+        """
+        Corrects the text from a file. The file should be in the format of
+        """
+
+        if src.endswith('.csv'):
+            src = pd.read_csv(src)
+
+        elif src.endswith('.txt'):
+            with open(src, 'r', encoding='utf-8') as file:
+                src = file.readlines()
+            if target is not None:
+                with open(target, 'r', encoding='utf-8') as file:
+                    target = file.readlines()
+        else:
+            raise NeuralSpellCheckerException("Unsupported file format. Only .csv and .txt are supported.") from None
+                
+        return self.correct(src, target, evaluate_flag)

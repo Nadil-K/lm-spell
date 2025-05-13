@@ -23,7 +23,6 @@ class ConfigUtils:
 
     @staticmethod
     def get_dataset_columns():
-
         config = ConfigUtils()
         return [
             config.get('dataset.inputs', 'text'),

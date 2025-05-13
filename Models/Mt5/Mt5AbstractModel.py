@@ -11,39 +11,6 @@ from NeuralSpellCheckerException import NeuralSpellCheckerException
 
 class Mt5AbstractModel(EncoderDecoderAbstract):
 
-    def process_input(self, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str = None):
-        """
-        Process the input set and target set. The input set should be a string, a list of strings or a DataFrame.
-        The target set should be a string or a list of strings.
-        """
-
-        dataset_col_names = ConfigUtils.get_dataset_columns()
-
-        if isinstance(input_set, pd.DataFrame):
-            return input_set, True
-            
-        evaluate_flag = False
-        data = []
-        
-        if isinstance(input_set, str):
-
-            text = input_set
-            evaluate_flag = target_set is not None and isinstance(target_set, str)
-            expected = target_set if evaluate_flag else ""
-            data = [{dataset_col_names[0]: text, dataset_col_names[1]: expected}]
-            
-        elif isinstance(input_set, list) and isinstance(input_set[0], str):
-
-            evaluate_flag = (target_set is not None and 
-                               isinstance(target_set, list) and 
-                               len(target_set) == len(input_set))
-            
-            data = [{dataset_col_names[0]: s.strip(), dataset_col_names[1]: t.strip()} for s, t in zip(input_set, target_set)] if evaluate_flag else [{dataset_col_names[0]: s.strip(), dataset_col_names[1]: ""} for s in input_set]
-
-        input_set = pd.DataFrame(data)
-        return input_set, evaluate_flag
-
-
     def correct(self, max_length: int, batch_size: int, shuffle: bool, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None):
         """
         Corrects the text. The input set should be a string, a list of strings or a DataFrame.
@@ -72,8 +39,20 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
         results_df = self.decode(originals, predictions, labels)
 
         if evaluate_flag:
+            eval_df = results_df.iloc[:, :2].copy()
+            if isinstance(target_set, pd.DataFrame):
+                target_col = target_set.iloc[:, 0] if target_set.shape[1] > 0 else pd.Series([])
+            elif isinstance(target_set, list):
+                target_col = pd.Series(target_set)
+            elif isinstance(target_set, str):
+                target_col = pd.Series([target_set])
+
+            eval_df[ConfigUtils.get_results_columns()[2]] = target_col.reset_index(drop=True)
+
             print("Evaluating the outputs...")
-            EvaluateUtils.evaluate_from_dataframe(results_df, self.exp_dir)
+            EvaluateUtils.evaluate_from_dataframe(eval_df, self.exp_dir)
+
+        return results_df
 
 
     def decode(self, originals, predictions, labels):
