@@ -16,6 +16,7 @@ class ModelAbstract(ABC):
         - max_seq_length
         - exp_dir
         '''
+        self.seed = 42
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.exp_dir = '/'
     
