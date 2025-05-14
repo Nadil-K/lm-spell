@@ -1,111 +1,181 @@
-from transformers import AutoTokenizer, AutoModel, get_linear_schedule_with_warmup, get_cosine_schedule_with_warmup, get_constant_schedule
 import torch
-from torch.utils.data import DataLoader, Dataset
-from Trainer.trainer import Trainer
-from utils.utils import clean_memory
+from accelerate import Accelerator
+from Utils.GeneralUtils import GeneralUtils
+from Utils.DatasetUtils import DatasetUtils
+from EarlyStopping import EarlyStopping
+from torch.nn import CrossEntropyLoss
+from torch.optim import AdamW
+from transformers import DataCollatorForSeq2Seq, get_linear_schedule_with_warmup
 from tqdm import tqdm
+from LMSpellDataset import LMSpellDataset
+from torch.utils.data import DataLoader
+import os
+from ModelEnum import ModelEnum
 
-class Seq2SeqTrainer(Trainer):
+class Seq2SeqTrainer:
+
     def __init__(
-        self, 
-        model: AutoModel, 
-        tokenizer: AutoTokenizer,
-        optimizer: torch.optim.Optimizer,
-        scheduler: torch.optim.lr_scheduler,
-        early_stopping,
-        criterion: torch.nn.modules.loss,
-        train_dataset: Dataset,
-        test_dataset: Dataset,
-        val_dataset: Dataset,
-        batch_size: int = 32,
-        epochs: int = 3,
-        learning_rate: float = 5e-5,
-        max_length: int = 512,
-    ):
-        super().__init__(model, 
-                         tokenizer,
-                         optimizer,
-                         scheduler, 
-                        early_stopping,
-                        criterion,
-                        train_dataset,
-                        test_dataset,
-                        val_dataset,
-                         batch_size, 
-                         epochs, 
-                         learning_rate, 
-                         max_length
-                         )
-    
-    def _train_step(self, inputs):
-        with self.accelerator.accumulate(self.model):
-            outputs = self.model(input_ids=inputs['input_ids'], attention_mask=inputs['attention_mask'], labels=inputs['labels'])
-            # loss = self.loss_fn(outputs.logits, inputs['labels'])
-            loss = outputs.loss
-            self.accelerator.backward(loss)
-            # accelerator.clip_grad_norm_(model.parameters(), 1.0) # Adding Clip Grad Norm
-            self.optimizer.step()
-            self.lr_scheduler.step()
-            self.optimizer.zero_grad()
-            return loss.detach().item()
-    
-    
-    def _accumulate_loss(self, total_loss, dataloader):
-        total_loss_t = torch.tensor(total_loss / len(dataloader)).to(self.accelerator.device)
-        gathered_loss = self.accelerator.gather(total_loss_t)
-        self.accelerator.wait_for_everyone()
-        final_total_loss = gathered_loss.mean()
-        self.accelerator.print(f'loss:{final_total_loss:.6f}')
-        return final_total_loss
-    
-    def _training_function(self):
-        from accelerate import Accelerator
-        clean_memory()
-        self.accelerator = Accelerator()
-        self.accelerator.print("Trainable Parameters:", f"{self.model.num_parameters(only_trainable = True)//1e6} Million" )
-        self.accelerator.print("Model Memory Footprint:", f"{self.model.get_memory_footprint()/(1024*1024*1024) :.2f} GB")
-        self.accelerator.print("Memory Used:", f"{torch.cuda.memory_allocated()/1e9:.2f} GB")
+            self,
+            model_instance,
+            train_path,
+            val_path,
+            test_path,
+            batch_size = 8,
+            epochs = 20,
+            accelerator = Accelerator(),
+            dataset = LMSpellDataset,
+            special_tokens_to_add = None,
+            dataset_size = 1,
+            train_batch_size = 16,
+            test_batch_size = 16,
+            train_max_length = 128,
+            test_max_length = 128,
+            gradient_accumulation_steps = 1,
+            lr_and_opt_path = None,
+        ):
+        self.model_instance = model_instance
+        self.train_path = train_path
+        self.val_path = val_path
+        self.test_path = test_path
+        self.batch_size = batch_size
+        self.epochs = epochs
+        self.accelerator = accelerator
+        self.dataset = dataset
+        self.special_tokens_to_add = special_tokens_to_add
+        self.dataset_size = dataset_size
+        self.train_batch_size = train_batch_size
+        self.test_batch_size = test_batch_size
+        self.train_max_length = train_max_length
+        self.test_max_length = test_max_length
+        self.gradient_accumulation_steps = gradient_accumulation_steps
+        self.lr_and_opt_path = lr_and_opt_path
+
+    def train(self):
+        GeneralUtils.clean_memory()
+
+        self.initialize_model_and_tokenizer()
+        starting_epoch = 0
         
-        self.model, self.optimizer, self.train_loader = self.accelerator.prepare(self.model, self.optimizer, self.train_loader)
-        self.model.train()
-        for epoch in range(self.epochs):
-            loss = 0
+        if self.args.resume_training:
+            starting_epoch = self.args.resume_training_from
+            self.accelerator.print(f"Resuming Training from Epoch {starting_epoch}")
+        
+        for epoch in range(starting_epoch, self.args.epochs + starting_epoch):
+            self.epoch = epoch
+            self.model.train()
+            total_loss = 0
             with tqdm(self.train_dataloader, leave=True, disable=not self.accelerator.is_local_main_process, mininterval=4) as pbar_train:
                 for inputs in pbar_train:
-                    loss += self._train_step(inputs)
-                total_loss = self._accumulate_loss(total_loss, self.train_dataloader)        
-            print(f"Epoch {epoch + 1}/{self.epochs} completed.")
+                    total_loss += self.train_step(inputs)
+                    if self.accelerator.is_main_process and self.step_counter % 100 == 0: 
+                    self.step_counter += 1
+                final_total_loss = self.accumulate_loss(total_loss, self.train_dataloader)        
 
-    def train(self, num_processes=1):
-        from accelerate import notebook_launcher
-        notebook_launcher(self._training_function, num_processes=num_processes)
+            # Validation
+            self.metrics = Metrics(self.val_dataloader, self.args.exp_dir, ZWJ_Fix=(self.special_tokens_to_add is not None), model=self.args.model)
+            final_val_loss, last_prediction = self.validate()
+            model_dir = self.save_model(epoch)
+            
+            # End of Validation Cycle
+            if self.accelerator.is_main_process:
+                training_time_tqdm = pbar_train.format_dict["elapsed"]
+                self.metrics.end_epoch(epoch, final_val_loss, final_total_loss, training_time_tqdm//60)
+                if self.early_stopping.step(final_total_loss, final_val_loss, model_dir):
+                    self.early_stopping.summary()
+                    self.accelerator.set_trigger()
+            
+            self.accelerator.wait_for_everyone() 
+            if self.accelerator.check_trigger():
+                    break
+            
+    def initialize_model_and_tokenizer(self):
+        model = self.model_instance.model            
+        tokenizer = self.model_instance.tokenizer
 
-    def test(self):
-        self.model.eval()
-        test_loader = DataLoader(self.dataset, batch_size=self.batch_size, shuffle=False)
-        total_loss = 0
-        with torch.no_grad():
-            for batch in test_loader:
-                inputs = self.tokenizer(batch['input_text'], return_tensors='pt', padding=True, truncation=True, max_length=self.max_length)
-                labels = self.tokenizer(batch['target_text'], return_tensors='pt', padding=True, truncation=True, max_length=self.max_length)
-                outputs = self.model(**inputs, labels=labels['input_ids'])
-                loss = outputs.loss
-                total_loss += loss.item()
-        avg_loss = total_loss / len(test_loader)
-        print(f"Test loss: {avg_loss}")
+        if self.special_tokens_to_add is not None:
+                tokenizer.add_special_tokens({'additional_special_tokens': self.special_tokens_to_add})
+                model.resize_token_embeddings(len(tokenizer))
+                self.accelerator.print("Added following special tokens:")
+                for tok in self.special_tokens_to_add:
+                     self.accelerator.print(f"Token: {tok}, ID: {tokenizer.convert_tokens_to_ids(tok)}")
+            
 
-    def _save_model(self, save_path: str):
-        self.accelerator.print("Saving Model")
-        model_dir = f'outputs/epoch_{self.epoch + 1}'
+        self.early_stopping = EarlyStopping(self.model_instance.exp_dir, self.epochs) #require to load the best model from the checkpoint
+        self.criterion = CrossEntropyLoss()
+        self.initialize_dataloader()
+        self.optimizer = AdamW(model.parameters(), lr=self.args.lr)
+        self.lr_scheduler = get_linear_schedule_with_warmup(
+            optimizer=self.optimizer,
+            num_warmup_steps=self.args.num_warmup_steps,
+            num_training_steps=(len(self.train_dataloader) * self.epochs) // self.gradient_accumulation_steps
+        )
 
-    def save_tokenizer(self, save_path: str):
-        self.tokenizer.save_pretrained(save_path)
-        print(f"Tokenizer saved to {save_path}")
+        if self.lr_and_opt_path:
+            self.accelerator.print(f"Loading Optimizer and Scheduler from {self.lr_and_opt_path}")
+            
+            optimizer_state = torch.load(os.path.join(self.model_instance.exp_dir, 'optimizer.pt'))
+            scheduler_state = torch.load(os.path.join(self.model_instance.exp_dir, 'scheduler.pt'))
+            self.lr_scheduler.load_state_dict(scheduler_state)
+            self.optimizer.load_state_dict(optimizer_state)
+        else:
+            self.accelerator.print("Default Optimizer(Adaw) and Scheduler(Linear Scheduler with Warmup) is used")
+        
+        self.accelerator.register_for_checkpointing(self.lr_scheduler)
+        
+        if self.model_instance.model_label in [ModelEnum.MT5_BASE, ModelEnum.MT5_XL]:
+            '''
+            When launching an trainijng through the CLI and error occurs when the model is passed accellerator.prepare. 
+            The error is fixed by making the layers contiguous. This error is not observed when the training is 
+            launch through notebook launcher.
+            '''
+            for _, param in model.named_parameters():
+                if not param.is_contiguous():
+                    param.data = param.data.contiguous()
+        self.model, self.optimizer, self.lr_scheduler, self.train_dataloader, self.val_dataloader, self.test_dataloader = self.accelerator.prepare(
+            model, self.optimizer, self.lr_scheduler, self.train_dataloader, self.val_dataloader, self.test_dataloader
+        )
 
-    def save_optimizer(self, save_path: str):
-        torch.save(self.optimizer.state_dict(), save_path)
-        print(f"Optimizer state saved to {save_path}")
+    def initialize_dataloader(self):
+        tokenizer = self.model_instance.tokenizer
+        dataset = DatasetUtils(train_path=self.train_path, val_path=self.val_path, test_path=self.test_path, dataset_size=self.dataset_size)
 
-    def save_scheduler(self, save_path: str):
-        torch.save(self.scheduler.state_dict(), save_path)
-        print(f"Scheduler state saved to {save_path}")
+        self.accelerator.print("Initializing Dataloaders")
+        self.accelerator.print("Train dataset size:", dataset.train_dataset.shape)
+        self.accelerator.print("Validation dataset size:", dataset.val_dataset.shape)
+        self.accelerator.print("Test dataset size:", dataset.test_dataset.shape)
+        
+        train_dataset = self.dataset(dataset.train_dataset, tokenizer, self.train_max_length)
+        val_dataset = self.dataset(dataset.val_dataset, tokenizer, self.train_max_length)
+
+        # causes an issue with decoding OverflowError: out of range integral type conversion attempted
+        # data_collator_train = DataCollatorForSeq2Seq(
+        #     tokenizer=tokenizer,
+        #     padding ="longest",
+        #     max_length = self.train_max_length,
+        #     pad_to_multiple_of=8,
+        #     label_pad_token_id = tokenizer.pad_token_id
+        # )
+        # val_collator_test = DataCollatorForSeq2Seq(
+        #     tokenizer=tokenizer,
+        #     padding ="max_length",
+        #     max_length = self.train_max_length,
+        #     pad_to_multiple_of=8,
+        #     label_pad_token_id = tokenizer.pad_token_id
+        # )      
+        data_collator_test = DataCollatorForSeq2Seq(
+            tokenizer=tokenizer,
+            padding = "longest", # TODO: Chnage to max_length
+            max_length = self.test_max_length,
+            pad_to_multiple_of=8,
+            label_pad_token_id = tokenizer.pad_token_id
+        )
+
+        train_dataloader = DataLoader(train_dataset, batch_size=self.train_batch_size, shuffle=False, pin_memory=True)
+        val_dataloader = DataLoader(val_dataset, batch_size=self.train_batch_size, shuffle=False, pin_memory=True)
+
+        test_dataset = self.dataset(self.test_set, self.tokenizer, self.test_max_length)
+        test_dataloader = DataLoader(test_dataset, batch_size=self.test_batch_size, collate_fn=data_collator_test, shuffle=False, pin_memory=True)
+        
+        self.train_dataloader = train_dataloader
+        self.val_dataloader = val_dataloader
+        self.test_dataloader = test_dataloader

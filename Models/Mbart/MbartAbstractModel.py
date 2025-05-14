@@ -7,6 +7,9 @@ class MbartAbstractModel(EncoderDecoderAbstract):
         self.tokenizer = "Tokenizer for MBART50"
         print('MBART50 Large Model')
 
+        # set lang when initializing the tokenizer
+        
+
     def correct(self, text):
         pass
 
