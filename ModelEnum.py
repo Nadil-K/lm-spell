@@ -18,20 +18,20 @@ class ModelEnum(Enum):
     XLMR_FT_SI = "surge-masks/xlmr-base-ft-ssc"
 
     # Llama 3.1 models
-    LLAMA_31_8B = "meta-llama/Llama-3.1-8B"
-    LLAMA_31_8B_INSTRUCT = "meta-llama/Llama-3.1-8B-Instruct"
+    LLAMA_31_8B = "unsloth/Meta-Llama-3.1-8B-bnb-4bit"
+    LLAMA_31_8B_INSTRUCT = "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit"
     
     # Llama 3.2 models
-    LLAMA_32_1B = "meta-llama/Llama-3.2-1B"
-    LLAMA_32_1B_INSTRUCT = "meta-llama/Llama-3.2-1B-Instruct"
-    LLAMA_32_3B = "meta-llama/Llama-3.2-3B"
-    LLAMA_32_3B_INSTRUCT = "meta-llama/Llama-3.2-3B-Instruct"
+    LLAMA_32_1B = "unsloth/Llama-3.2-1B-bnb-4bit"
+    LLAMA_32_1B_INSTRUCT = "unsloth/Llama-3.2-1B-Instruct-bnb-4bit"
+    LLAMA_32_3B = "unsloth/Llama-3.2-3B-bnb-4bit"
+    LLAMA_32_3B_INSTRUCT = "unsloth/Llama-3.2-3B-Instruct-bnb-4bit"
     
     # Gemma 2 models
-    GEMMA_2_2B = "google/gemma-2-2b"
-    GEMMA_2_2B_INSTRUCT = "google/gemma-2-2b-Instruct"
-    GEMMA_2_9B = "google/gemma-2-9b"
-    GEMMA_2_9B_INSTRUCT = "google/gemma-2-9b-Instruct"
+    GEMMA_2_2B = "unsloth/gemma-2-2b-bnb-4bit"
+    GEMMA_2_2B_INSTRUCT = "unsloth/gemma-2-2b-it-bnb-4bit"
+    GEMMA_2_9B = "unsloth/gemma-2-9b-bnb-4bit"
+    GEMMA_2_9B_INSTRUCT = "unsloth/gemma-2-9b-it-bnb-4bit"
 
     # MT5 models
     MT5_SMALL = "google/mt5-small"
