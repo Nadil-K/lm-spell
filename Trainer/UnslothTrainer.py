@@ -6,6 +6,7 @@ from Utils.DatasetUtils import DatasetUtils
 
 class UnslothTrainer():
     def __init__(
+            self,
             model_instance, 
             train_path, 
             val_path,
