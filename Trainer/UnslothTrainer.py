@@ -10,11 +10,12 @@ class UnslothTrainer():
             model_instance, 
             train_path, 
             val_path,
+            exp_name,
             batch_size = 4,
             epochs = 1,
             gradient_accumulation_steps = 2,
             lr = 1e-4,
-            save_steps=100000,
+            saving_steps=100000,
             dataset_size = 1, 
             load_in_4bit=True,
         ):
@@ -22,11 +23,12 @@ class UnslothTrainer():
         self.model_instance = model_instance
         self.train_path = train_path
         self.val_path = val_path
+        self.exp_name = exp_name
         self.batch_size = batch_size
         self.epochs = epochs
         self.gradient_accumulation_steps = gradient_accumulation_steps
         self.lr = lr
-        self.save_steps = save_steps
+        self.saving_steps = saving_steps
         self.dataset_size = dataset_size
         self.dtype = torch.bfloat16
         self.load_in_4bit = load_in_4bit
@@ -39,7 +41,7 @@ class UnslothTrainer():
         if torch.cuda.get_device_name(0).startswith('Tesla T4'):
             self.dtype = torch.float16
 
-        exp_name = model_instance.exp_name
+        exp_name = self.exp_name
         dataset = DatasetUtils(train_path=self.train_path, val_path=self.val_path, dataset_size=self.dataset_size)
 
         def data_collator(examples):
@@ -51,6 +53,11 @@ class UnslothTrainer():
             if batch["input_ids"].size(1) > model_instance.max_seq_length:
                 batch["input_ids"] = batch["input_ids"][:, :model_instance.max_seq_length]
                 batch["attention_mask"] = batch["attention_mask"][:, :model_instance.max_seq_length]
+
+            labels = batch["input_ids"].clone()
+            # Update the labels in the batch
+            labels[labels == model_instance.tokenizer.pad_token_id] = -100
+            batch["labels"] = labels   
 
             return batch
 
@@ -77,6 +84,9 @@ class UnslothTrainer():
             seed = model_instance.seed,
             remove_unused_columns = False,
             dataset_kwargs = {"skip_prepare_dataset": True},
+            dataset_text_field = "text",
+            max_seq_length = model_instance.max_seq_length,
+            dataset_num_proc = os.cpu_count(),
         )
         
         trainer = SFTTrainer(
@@ -85,9 +95,6 @@ class UnslothTrainer():
             data_collator = data_collator,
             train_dataset = dataset.train_dataset,
             eval_dataset = dataset.val_dataset,
-            dataset_text_field = "text",
-            max_seq_length = model_instance.max_seq_length,
-            dataset_num_proc = os.cpu_count(),
             args = training_args,
         )
 
