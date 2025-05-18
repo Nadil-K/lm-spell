@@ -43,7 +43,6 @@ class DecoderAbstract(ModelAbstract):
 
         self.model = model
         self.tokenizer = tokenizer
-        self.language = 'Sinhala'   # get it dynamically
 
         self.PROMPT = f"""You are an expert {self.language} spell corrector. Below is a sentence in {self.language} language. It may or may not have a spelling mistake. Give the corrected output in {self.language}.
 
