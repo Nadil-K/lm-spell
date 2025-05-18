@@ -9,5 +9,16 @@
         "original" : "Original",
         "predicted" : "Corrected",
         "expected" : "Expected"
+    },
+
+    "fix_zwj": {
+        "mbart": true, 
+        "mt5": true,
+        "mt5-xl": true,
+        "xlmr": false,
+        "gemma": false,
+        "sinbert": false,
+        "llama-I": false,
+        "llama-B": false
     }
 }
