@@ -12,7 +12,7 @@ def test_get_configs():
             }
         }
     })
-    
+
     with patch("builtins.open", mock_open(read_data=mock_config_data)), patch("os.path.exists", return_value=True):
 
         config = ConfigUtils()

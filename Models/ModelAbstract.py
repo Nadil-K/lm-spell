@@ -18,19 +18,11 @@ class ModelAbstract(ABC):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     @abstractmethod
-    def correct(self, text):
+    def correct(self, src: str, target: str = None):
         pass
 
     @abstractmethod
-    def correctFromFile(self, src):
-        pass
-    
-    @abstractmethod
-    def evaluate(self, src, target):
-        pass
-    
-    @abstractmethod
-    def evaluateFromFile(self, src_file, target_file):
+    def correctFromFile(self, src: str, target: str = None):
         pass
     
     @abstractmethod
