@@ -13,15 +13,6 @@ class Llama318BModel(LlamaAbstractModel):
         self.do_sample = True       # get as a parameter
 
         super().__init__()
-
-    def correctFromFile(self, src):
-        pass
-    
-    def evaluate(self, src, target):
-        pass
-    
-    def evaluateFromFile(self, src_file, target_file):
-        pass
     
     def load_model(self):
         pass
