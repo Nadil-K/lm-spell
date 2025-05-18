@@ -1,21 +1,56 @@
-from Models.EncoderDecoderAbstract import EncoderDecoderAbstract
-from Utils.PrePostProcessingUtils import PrePostProcessingUtils
-from Utils.ConfigUtils import ConfigUtils
-from Datasets.Seq2SeqDataset import Seq2SeqDataset
-
 import torch
 import pandas as pd
-import tqdm
+from tqdm import tqdm
 from torch.utils.data import DataLoader
+from Utils.ConfigUtils import ConfigUtils
+from Utils.EvaluateUtils import EvaluateUtils
+from Datasets.Seq2SeqDataset import Seq2SeqDataset
+from Utils.PrePostProcessingUtils import PrePostProcessingUtils
+from Models.EncoderDecoderAbstract import EncoderDecoderAbstract
+from NeuralSpellCheckerException import NeuralSpellCheckerException
 
 class Mt5AbstractModel(EncoderDecoderAbstract):
 
-    # this should be 'correct'
-    def predict(self, input_set: list[str] | str, max_length: int, batch_size: int, shuffle: bool):
+    def process_input(self, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str = None):
+        """
+        Process the input set and target set. The input set should be a string, a list of strings or a DataFrame.
+        The target set should be a string or a list of strings.
+        """
 
+        dataset_col_names = ConfigUtils.get_dataset_columns()
+
+        if isinstance(input_set, pd.DataFrame):
+            return input_set, True
+            
+        evaluate_flag = False
+        data = []
+        
         if isinstance(input_set, str):
-            input_set = [input_set]
-            batch_size = 1
+
+            text = input_set
+            evaluate_flag = target_set is not None and isinstance(target_set, str)
+            expected = target_set if evaluate_flag else ""
+            data = [{dataset_col_names[0]: text, dataset_col_names[1]: expected}]
+            
+        elif isinstance(input_set, list) and isinstance(input_set[0], str):
+
+            evaluate_flag = (target_set is not None and 
+                               isinstance(target_set, list) and 
+                               len(target_set) == len(input_set))
+            
+            data = [{dataset_col_names[0]: s.strip(), dataset_col_names[1]: t.strip()} for s, t in zip(input_set, target_set)] if evaluate_flag else [{dataset_col_names[0]: s.strip(), dataset_col_names[1]: ""} for s in input_set]
+
+        input_set = pd.DataFrame(data)
+        return input_set, evaluate_flag
+
+
+    def correct(self, max_length: int, batch_size: int, shuffle: bool, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None):
+        """
+        Corrects the text. The input set should be a string, a list of strings or a DataFrame.
+        Perform the evaluation if the target set is provided.
+        """
+
+        input_set, evaluate_flag = self.process_input(input_set, target_set)
 
         dataset = Seq2SeqDataset(input_set, self.tokenizer, max_length)
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
@@ -25,22 +60,26 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
         with tqdm(dataloader, leave=True) as pbar:
             for batch in pbar:
                 with torch.no_grad():
-                    outputs = self.model(input_ids=batch.input_ids, attention_mask=batch.attention_mask)
-                original = batch['input_ids']
+                    batch = {k: v.to(self.device) for k, v in batch.items()}
+                    outputs = self.model(input_ids=batch["input_ids"], attention_mask=batch["attention_mask"], labels=batch["labels"])
+                original = batch["input_ids"]
                 prediction = torch.argmax(outputs.logits, dim=-1)
-                label = batch.get('labels') #this is only present when we are testing. its not there when we are predicting better to have a mechanism to prevent this
-                if batch.get('labels') is not None:
+                label = batch.get("labels") #this is only present when we are testing. its not there when we are predicting better to have a mechanism to prevent this
+                if batch.get("labels") is not None:
                     labels.extend(label)
                 originals.extend(original),  predictions.extend(prediction)
 
-        self.decode(originals, predictions, labels)
+        results_df = self.decode(originals, predictions, labels)
+
+        if evaluate_flag:
+            print("Evaluating the outputs...")
+            EvaluateUtils.evaluate_from_dataframe(results_df, self.exp_dir)
 
 
     def decode(self, originals, predictions, labels):
         """
-        Decode a tensor of tensors and save it to a file. Multiple examples
+        Decode a tensor of tensors and save it to a file.
         """
-        # May be we can use it to decode single example as well.
 
         skip_special_tokens = False
 
@@ -60,12 +99,7 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
             for data in (originals, predictions, labels)
         ]
 
-        config = ConfigUtils()
-        result_col_names = [
-            config.get('results.original', 'Original'),
-            config.get('results.predicted', 'Corrected'),
-            config.get('results.expected', 'Expected')
-        ]
+        result_col_names = ConfigUtils.get_results_columns()
 
         results_data = {
             result_col_names[0]: originals_decoded,
@@ -84,3 +118,24 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
             results_df[column] = PrePostProcessingUtils.clean_zwj(results_df[column])
 
         PrePostProcessingUtils.save_dataframe(results_df, self.exp_dir)
+
+        return results_df
+
+    def correctFromFile(self, max_length: int, batch_size: int, shuffle: bool, src: str, target: str = None):
+        """
+        Corrects the text from a file. The file should be in the format of
+        """
+
+        if src.endswith('.csv'):
+            src = pd.read_csv(src)
+
+        elif src.endswith('.txt'):
+            with open(src, 'r', encoding='utf-8') as file:
+                src = file.readlines()
+            if target is not None:
+                with open(target, 'r', encoding='utf-8') as file:
+                    target = file.readlines()
+        else:
+            raise NeuralSpellCheckerException("Unsupported file format. Only .csv and .txt are supported.") from None
+                
+        return self.correct(max_length, batch_size, shuffle, src, target)
