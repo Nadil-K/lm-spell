@@ -20,5 +20,16 @@
         "sinbert": false,
         "llama-I": false,
         "llama-B": false
+    },
+
+    "google": {
+        "REFRESH_TOKEN" : <REFRESH_TOKEN>,
+        "CLIENT_SECRET" : <CLIENT_SECRET>,
+        "PROJECT_ID" : <PROJECT_ID>,
+        "FOLDER_ID" : <FOLDER_ID>
+    },
+
+    "huggingface": {
+        "TOKEN": <TOKEN>
     }
 }
