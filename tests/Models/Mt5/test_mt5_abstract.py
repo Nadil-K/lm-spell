@@ -25,14 +25,14 @@ def mock_model():
 def test_predict_single_input(mock_tqdm_module, mock_model):
 
     mock_model.decode = MagicMock()
-    mock_model.predict("input example", max_length=10, batch_size=1, shuffle=False)
+    mock_model.correct(max_length=10, batch_size=1, shuffle=False, input_set="input example")
     mock_model.decode.assert_called_once()
 
 @patch("Models.Mt5.Mt5AbstractModel.tqdm")
 def test_predict_multiple_inputs(mock_tqdm_module, mock_model):
 
     mock_model.decode = MagicMock()
-    mock_model.predict(["Text A", "Text B"], max_length=10, batch_size=2, shuffle=False)
+    mock_model.correct(max_length=10, batch_size=2, shuffle=False, input_set=["Text A", "Text B"])
     mock_model.decode.assert_called_once()
 
 def test_decode_function(mock_model):
@@ -42,12 +42,7 @@ def test_decode_function(mock_model):
 
     with patch("Models.Mt5.Mt5AbstractModel.PrePostProcessingUtils.remove_special_tokens", side_effect=lambda tokens, all_ids, keep_id: tokens), \
          patch("Models.Mt5.Mt5AbstractModel.PrePostProcessingUtils.clean_zwj", side_effect=lambda x: x), \
-         patch("Models.Mt5.Mt5AbstractModel.PrePostProcessingUtils.save_dataframe") as mock_save_dataframe, \
-         patch("Models.Mt5.Mt5AbstractModel.ConfigUtils") as mock_config_utils:
-
-        mock_config = MagicMock()
-        mock_config.get.side_effect = lambda key, default: default
-        mock_config_utils.return_value = mock_config
+         patch("Models.Mt5.Mt5AbstractModel.PrePostProcessingUtils.save_dataframe") as mock_save_dataframe:
 
         mock_model.decode(originals, predictions, labels)
 

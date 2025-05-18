@@ -1,0 +1,35 @@
+{
+    "dataset": {
+        "seq2seq" : {
+            "inputs": "text",
+            "targets": "expected"
+        }
+    },
+    "results" : {
+        "original" : "Original",
+        "predicted" : "Corrected",
+        "expected" : "Expected"
+    },
+
+    "fix_zwj": {
+        "mbart": true, 
+        "mt5": true,
+        "mt5-xl": true,
+        "xlmr": false,
+        "gemma": false,
+        "sinbert": false,
+        "llama-I": false,
+        "llama-B": false
+    },
+
+    "google": {
+        "REFRESH_TOKEN" : "1//04NaD9KHfgxPCCgYIARAAGAQSNwF-L9IrxqMuV0LQ2s9r0UtcluGJ8cosBSRZpuJ_ctNuFBEQLsG7F_b_klkPGihl-lP1TRiDfno",
+        "CLIENT_SECRET" : "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",
+        "PROJECT_ID" : "neural-spell-checker-428813",
+        "FOLDER_ID" : "1IlzJon8PASm_x9Pl8BS3outOBY0w2N9y"
+    },
+
+    "huggingface": {
+        "TOKEN": "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"
+    }
+}

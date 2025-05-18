@@ -19,3 +19,21 @@ class ConfigUtils:
             return value
         except KeyError:
             return default
+
+
+    @staticmethod
+    def get_dataset_columns():
+        config = ConfigUtils()
+        return [
+            config.get('dataset.inputs', 'text'),
+            config.get('dataset.targets', 'expected')
+        ]
+    
+    @staticmethod
+    def get_results_columns():
+        config = ConfigUtils()
+        return [
+            config.get('results.original', 'Original'),
+            config.get('results.predicted', 'Corrected'),
+            config.get('results.expected', 'Expected')
+        ]

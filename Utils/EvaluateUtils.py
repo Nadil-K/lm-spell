@@ -1,6 +1,12 @@
+import re
+import pandas as pd
+from Utils.ConfigUtils import ConfigUtils
 from diff_match_patch import diff_match_patch
 
 class EvaluateUtils:
+    @staticmethod
+    def remove_space_before_period(text):
+        return re.sub(r'\s([.])', r'\1', text)
 
     @staticmethod
     def levenshtein_distance(a, b):
@@ -107,7 +113,7 @@ class EvaluateUtils:
         return text.replace("\u00A0", "\u0020")
 
     @staticmethod
-    def mark_insertions_and_deletions_by_words(original, gold):
+    def mark_insertions_and_deletions(original, gold):
         num_org_words = len(original.split())
         num_gold_words = len(gold.split())
         normalized_original = EvaluateUtils.normalize_spaces(original)
@@ -206,7 +212,7 @@ class EvaluateUtils:
         return plus_count > 20 or minus_count > 20
 
     @staticmethod
-    def evaluate_by_words(srcs, preds, refs, test_name = "", replace=False):
+    def evaluate(srcs, preds, refs, replace=False):
         length = len(refs)
         z = 0
 
@@ -296,8 +302,8 @@ class EvaluateUtils:
             gold_edits_ps = aligned_ref
             x_ps = aligned_src
 
-            marked_src = EvaluateUtils.mark_insertions_and_deletions_by_words(src_single, ref_single)
-            marked_pred = EvaluateUtils.mark_insertions_and_deletions_by_words(pred_single, ref_single)
+            marked_src = EvaluateUtils.mark_insertions_and_deletions(src_single, ref_single)
+            marked_pred = EvaluateUtils.mark_insertions_and_deletions(pred_single, ref_single)
 
             if EvaluateUtils.has_excessive_symbols(marked_pred):
                 replacements += 1
@@ -436,7 +442,6 @@ class EvaluateUtils:
             corrections_F0_5 += safe_division(((1 + 0.5 ** 2) * c_recall * c_prec * 100), (c_recall + (0.5 ** 2) * c_prec))
 
         return {
-            "Test Name" : test_name,
             'Detection Accuracy': detection_accuracy / length,
             'Detection Recall': (detection_recall * 100) / length,
             'Detection Precision': (detection_precision * 100) / length,
@@ -447,12 +452,40 @@ class EvaluateUtils:
             'Correction Precision': (correction_precision * 100) / length,
             'Correction F1': corrections_F1 / length,
             'Correction F0.5': corrections_F0_5 / length,
-            'replacements' : replacements,
         }
     
     @staticmethod
-    def print_in_tab_seperated_format(df):
+    def evaluate_from_dataframe(df, exp_dir, replace=False):
+        """
+        Evaluate the model using a DataFrame containing source, predicted, and reference columns.
+        """
 
+        result_col_names = ConfigUtils.get_results_columns()
+
+        srcs = df[result_col_names[0]]
+        preds = df[result_col_names[1]]
+        refs = df[result_col_names[2]]
+
+        EvaluateUtils.process_results(EvaluateUtils.evaluate(srcs, preds, refs, replace), exp_dir)
+    
+    @staticmethod
+    def process_results(results, exp_dir):
+        """
+        Process the results DataFrame and save it to a CSV file.
+        """
+
+        results_file_path = f"{exp_dir}/evaluation_results.txt"
+        with open(results_file_path, "w", encoding="utf-8") as file:
+            for key, value in results.items():
+                file.write(f"{key}: {value}\n")
+        print(f"Evaluation results saved to {results_file_path}")
+        
+        print("Evaluation results: ")
+        for key, value in results.items():
+            print(f"{key}: {value}")
+
+    @staticmethod
+    def print_in_tab_seperated_format(df):
         filtered_df = df[df['Without Replacement'].astype(str).str.contains(r"\.")]
         row_data = "\t".join(
             f"{float(wr):.2f}" if wr == wrp and not isinstance(wr, str) and not isinstance(wrp, str)
@@ -460,5 +493,3 @@ class EvaluateUtils:
             else f"{wr}"  # fallback if values are strings
             for wr, wrp in zip(filtered_df['Without Replacement'], filtered_df['With Replacement'])
         )
-
-        print(row_data)
