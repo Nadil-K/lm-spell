@@ -21,6 +21,7 @@ class Seq2SeqTrainer:
             train_path,
             val_path,
             test_path,
+            exp_no,
             batch_size = 8,
             epochs = 20,
             lr = 1e-5,
@@ -35,13 +36,16 @@ class Seq2SeqTrainer:
             test_max_length = 128,
             zero_stage = 2,
             gradient_accumulation_steps = 1,
+            patience = 3,
             lr_and_opt_path = None,
             resume_training_from = None,
+            resume_training = False,
         ):
         self.model_instance = model_instance
         self.train_path = train_path
         self.val_path = val_path
         self.test_path = test_path
+        self.exp_no = exp_no
         self.batch_size = batch_size
         self.epochs = epochs
         self.lr = lr
@@ -58,10 +62,12 @@ class Seq2SeqTrainer:
         self.gradient_accumulation_steps = gradient_accumulation_steps
         self.lr_and_opt_path = lr_and_opt_path
         self.resume_training_from = resume_training_from
+        self.resume_training = resume_training
         self.train_dataloader = None
         self.val_dataloader = None
         self.test_dataloader = None
         self.step_counter = 0
+        self.patience = patience
 
     def train(self):
         GeneralUtils.clean_memory()
@@ -102,7 +108,7 @@ class Seq2SeqTrainer:
 
     def validate(self):
         self.accelerator.print("Validation Started")
-        GeneralUtils.lean_memory()
+        GeneralUtils.clean_memory()
         self.model_instance.model.eval()
         total_val_loss = 0
         with tqdm(self.val_dataloader, leave=True, disable=not self.accelerator.is_local_main_process) as pbar:
@@ -125,7 +131,7 @@ class Seq2SeqTrainer:
                      self.accelerator.print(f"Token: {tok}, ID: {tokenizer.convert_tokens_to_ids(tok)}")
             
 
-        self.early_stopping = EarlyStopping(self.model_instance.exp_dir, self.epochs) #require to load the best model from the checkpoint
+        self.early_stopping = EarlyStopping(self.model_instance.exp_dir, self.epochs, self.patience, self.exp_no) #require to load the best model from the checkpoint
         self.criterion = CrossEntropyLoss()
         self.initialize_dataloader()
         self.optimizer = AdamW(model.parameters(), lr=self.lr)
@@ -172,21 +178,6 @@ class Seq2SeqTrainer:
         train_dataset = self.dataset(dataset.train_dataset, tokenizer, self.train_max_length)
         val_dataset = self.dataset(dataset.val_dataset, tokenizer, self.train_max_length)
 
-        # causes an issue with decoding OverflowError: out of range integral type conversion attempted
-        # data_collator_train = DataCollatorForSeq2Seq(
-        #     tokenizer=tokenizer,
-        #     padding ="longest",
-        #     max_length = self.train_max_length,
-        #     pad_to_multiple_of=8,
-        #     label_pad_token_id = tokenizer.pad_token_id
-        # )
-        # val_collator_test = DataCollatorForSeq2Seq(
-        #     tokenizer=tokenizer,
-        #     padding ="max_length",
-        #     max_length = self.train_max_length,
-        #     pad_to_multiple_of=8,
-        #     label_pad_token_id = tokenizer.pad_token_id
-        # )      
         data_collator_test = DataCollatorForSeq2Seq(
             tokenizer=tokenizer,
             padding = "longest", # TODO: Chnage to max_length

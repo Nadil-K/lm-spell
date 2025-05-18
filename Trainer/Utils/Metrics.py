@@ -80,7 +80,7 @@ class Metrics:
             gathered_predictions = [PrePostProcessingUtils.remove_special_tokens(tokens.to(device), all_special_ids, special_token_id_to_keep_tensor) for tokens in gathered_predictions]
             gathered_labels = [PrePostProcessingUtils.remove_special_tokens(tokens.to(device), all_special_ids, special_token_id_to_keep_tensor) for tokens in gathered_labels]
         
-        eval_results = EvaluateUtils.evaluate_by_words(
+        eval_results = EvaluateUtils.evaluate(
             [tokenizer.decode(ids, skip_special_tokens=skip_special_tokens).replace('\n', '')
             # .replace(" ", "")
             .replace("#", "")
@@ -88,7 +88,6 @@ class Metrics:
             .strip() for ids in gathered_original],
             [tokenizer.decode(ids, skip_special_tokens=skip_special_tokens) for ids in gathered_predictions],
             [tokenizer.decode(ids, skip_special_tokens=skip_special_tokens) for ids in gathered_labels], 
-            epoch,
             replace
         )        
         for key in self.final_results:

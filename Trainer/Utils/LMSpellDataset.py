@@ -10,7 +10,7 @@ class LMSpellDataset(Dataset):
         return len(self.dataframe)
 
     def __getitem__(self, idx):
-        item = self.dataframe.iloc[idx]
+        item = self.dataframe[idx]
         inputs = self.tokenizer(item['text'], return_tensors='pt', padding='max_length', truncation=True, max_length=self.max_length)
         targets = self.tokenizer(item['expected'], return_tensors='pt', padding='max_length', truncation=True, max_length=self.max_length)
         inputs['labels'] = targets['input_ids']
