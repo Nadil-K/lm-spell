@@ -40,7 +40,7 @@ def test_decode_function(mock_model):
     predictions = [torch.tensor([4, 5, 6])]
     labels = [torch.tensor([4, 5, 6])]
 
-    with patch("Utils.PrePostProcessingUtils.remove_special_tokens", side_effect=lambda tokens, all_ids, keep_id: tokens), \
+    with patch("Utils.PrePostProcessingUtils.remove_special_tokens", side_effect=lambda tokens, all_ids, keep_ids: tokens), \
          patch("Utils.PrePostProcessingUtils.clean_zwj", side_effect=lambda x: x), \
          patch("Utils.PrePostProcessingUtils.save_dataframe") as mock_save_dataframe:
 
