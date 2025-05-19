@@ -6,8 +6,8 @@ from Models.Mt5.Mt5LargeModel import Mt5LargeModel
 
 @pytest.fixture
 def mock_model():
-    with patch("Models.Mt5.Mt5LargeModel.MT5ForConditionalGeneration.from_pretrained") as mock_model_loader, \
-         patch("Models.Mt5.Mt5LargeModel.T5TokenizerFast.from_pretrained") as mock_tokenizer_loader:
+    with patch("Models.Mt5.Mt5AbstractModel.MT5ForConditionalGeneration.from_pretrained") as mock_model_loader, \
+         patch("Models.Mt5.Mt5AbstractModel.T5TokenizerFast.from_pretrained") as mock_tokenizer_loader:
 
         mock_model_loader.return_value = MagicMock()
         mock_tokenizer = MagicMock()
