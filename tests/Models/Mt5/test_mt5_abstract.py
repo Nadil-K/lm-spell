@@ -21,14 +21,14 @@ def mock_model():
         model.exp_dir = "/tmp/test_exp"
         return model
 
-@patch("Models.Mt5.Mt5AbstractModel.tqdm")
+@patch("Models.EncoderDecoderAbstract.tqdm")
 def test_predict_single_input(mock_tqdm_module, mock_model):
 
     mock_model.decode = MagicMock()
     mock_model.correct(max_length=10, batch_size=1, shuffle=False, input_set="input example")
     mock_model.decode.assert_called_once()
 
-@patch("Models.Mt5.Mt5AbstractModel.tqdm")
+@patch("Models.EncoderDecoderAbstract.tqdm")
 def test_predict_multiple_inputs(mock_tqdm_module, mock_model):
 
     mock_model.decode = MagicMock()
@@ -40,9 +40,9 @@ def test_decode_function(mock_model):
     predictions = [torch.tensor([4, 5, 6])]
     labels = [torch.tensor([4, 5, 6])]
 
-    with patch("Models.Mt5.Mt5AbstractModel.PrePostProcessingUtils.remove_special_tokens", side_effect=lambda tokens, all_ids, keep_id: tokens), \
-         patch("Models.Mt5.Mt5AbstractModel.PrePostProcessingUtils.clean_zwj", side_effect=lambda x: x), \
-         patch("Models.Mt5.Mt5AbstractModel.PrePostProcessingUtils.save_dataframe") as mock_save_dataframe:
+    with patch("Utils.PrePostProcessingUtils.remove_special_tokens", side_effect=lambda tokens, all_ids, keep_id: tokens), \
+         patch("Utils.PrePostProcessingUtils.clean_zwj", side_effect=lambda x: x), \
+         patch("Utils.PrePostProcessingUtils.save_dataframe") as mock_save_dataframe:
 
         mock_model.decode(originals, predictions, labels)
 
