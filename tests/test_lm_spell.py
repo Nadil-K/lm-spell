@@ -8,7 +8,7 @@ class LMSpellTest(unittest.TestCase):
 
     def test_create_valid_model_instance(self):
         neuralSpellChecker = LMSpell("facebook/mbart-large-50")
-        self.assertEqual(neuralSpellChecker.model, ModelEnum.MBART50)
+        self.assertEqual(neuralSpellChecker.model_label, ModelEnum.MBART50)
         
     def test_validate_model_name(self):
         invalid_model_name = "facebook/mbart-large-60"
