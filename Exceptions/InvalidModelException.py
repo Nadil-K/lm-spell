@@ -1,4 +1,4 @@
-from NeuralSpellCheckerException import NeuralSpellCheckerException
+from LMSpellException import LMSpellException
 
-class InvalidModelException(NeuralSpellCheckerException):
+class InvalidModelException(LMSpellException):
     pass

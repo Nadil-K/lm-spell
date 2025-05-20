@@ -4,8 +4,8 @@ import os
 class ConfigUtils:
 
     def __init__(self):
-        if os.path.exists('NeuralSpellCheckerConfig.json'):
-            with open('NeuralSpellCheckerConfig.json', 'r') as f:
+        if os.path.exists('LMSpellConfig.json'):
+            with open('LMSpellConfig.json', 'r') as f:
                 self.config = json.load(f)
         else:
             self.config = {}

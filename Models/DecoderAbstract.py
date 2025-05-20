@@ -2,7 +2,7 @@ import pandas as pd
 from Utils.ConfigUtils import ConfigUtils
 from Utils.EvaluateUtils import EvaluateUtils
 from Models.ModelAbstract import ModelAbstract
-from NeuralSpellCheckerException import NeuralSpellCheckerException
+from LMSpellException import LMSpellException
 
 class DecoderAbstract(ModelAbstract):
 
@@ -117,6 +117,6 @@ class DecoderAbstract(ModelAbstract):
                 with open(target, 'r', encoding='utf-8') as file:
                     target = file.readlines()
         else:
-            raise NeuralSpellCheckerException("Unsupported file format. Only .csv and .txt are supported.") from None
+            raise LMSpellException("Unsupported file format. Only .csv and .txt are supported.") from None
                 
         return self.correct(src, target, evaluate_flag)

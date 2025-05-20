@@ -1,9 +1,9 @@
 import unittest
-from NeuralSpellChecker import NeuralSpellChecker
+from LMSpell import LMSpell
 from Exceptions.InvalidModelException import InvalidModelException
 from ModelEnum import ModelEnum
 
-class NeuralSpellCheckerTest(unittest.TestCase):
+class LMSpellTest(unittest.TestCase):
 
     def test_create_valid_model_instance(self):
         # neuralSpellChecker = NeuralSpellChecker("facebook/mbart-large-50")

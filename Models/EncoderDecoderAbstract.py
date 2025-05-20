@@ -7,7 +7,7 @@ from Utils.EvaluateUtils import EvaluateUtils
 from Models.ModelAbstract import ModelAbstract
 from Datasets.Seq2SeqDataset import Seq2SeqDataset
 from Utils.PrePostProcessingUtils import PrePostProcessingUtils
-from NeuralSpellCheckerException import NeuralSpellCheckerException
+from LMSpellException import LMSpellException
 
 class EncoderDecoderAbstract(ModelAbstract):
     
@@ -117,6 +117,6 @@ class EncoderDecoderAbstract(ModelAbstract):
                 with open(target, 'r', encoding='utf-8') as file:
                     target = file.readlines()
         else:
-            raise NeuralSpellCheckerException("Unsupported file format. Only .csv and .txt are supported.") from None
+            raise LMSpellException("Unsupported file format. Only .csv and .txt are supported.") from None
                 
         return self.correct(max_length, batch_size, shuffle, src, target)

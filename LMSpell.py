@@ -2,7 +2,7 @@ from ModelEnum import ModelEnum
 from Exceptions.InvalidModelException import InvalidModelException
 from Exceptions.EvaluateModelException import EvaluateModelException
 
-class NeuralSpellChecker:
+class LMSpell:
 
     def __init__(self, model):
         
