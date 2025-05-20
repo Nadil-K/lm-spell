@@ -483,3 +483,13 @@ class EvaluateUtils:
         print("Evaluation results: ")
         for key, value in results.items():
             print(f"{key}: {value}")
+
+    @staticmethod
+    def print_in_tab_seperated_format(df):
+        filtered_df = df[df['Without Replacement'].astype(str).str.contains(r"\.")]
+        row_data = "\t".join(
+            f"{float(wr):.2f}" if wr == wrp and not isinstance(wr, str) and not isinstance(wrp, str)
+            else f"{float(wr):.2f}({float(wrp):.2f})" if not isinstance(wr, str) and not isinstance(wrp, str)
+            else f"{wr}"  # fallback if values are strings
+            for wr, wrp in zip(filtered_df['Without Replacement'], filtered_df['With Replacement'])
+        )

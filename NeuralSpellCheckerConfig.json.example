@@ -23,13 +23,13 @@
     },
 
     "google": {
-        "REFRESH_TOKEN" : "1//04NaD9KHfgxPCCgYIARAAGAQSNwF-L9IrxqMuV0LQ2s9r0UtcluGJ8cosBSRZpuJ_ctNuFBEQLsG7F_b_klkPGihl-lP1TRiDfno",
-        "CLIENT_SECRET" : "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",
-        "PROJECT_ID" : "neural-spell-checker-428813",
-        "FOLDER_ID" : "1IlzJon8PASm_x9Pl8BS3outOBY0w2N9y"
+        "REFRESH_TOKEN" : <REFRESH_TOKEN>,
+        "CLIENT_SECRET" : <CLIENT_SECRET>,
+        "PROJECT_ID" : <PROJECT_ID>,
+        "FOLDER_ID" : <FOLDER_ID>
     },
 
     "huggingface": {
-        "TOKEN": "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"
+        "TOKEN": <TOKEN>
     }
 }
