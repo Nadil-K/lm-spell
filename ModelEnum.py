@@ -64,6 +64,8 @@ class ModelEnum(Enum):
         from Models.Mt5.Mt5LargeModel import Mt5LargeModel
 
         from Models.Mbart.MbartAbstractModel import MbartAbstractModel
+        from Models.Mbart.Mbart50Model import Mbart50Model
+
         from Models.SinBert.SinBertAbstractModel import SinBertAbstractModel
         from Models.Xlmr.XlmrAbstractModel import XlmrAbstractModel
         # import other model classes as needed
@@ -102,7 +104,7 @@ class ModelEnum(Enum):
             ModelEnum.MT5_XXL: Mt5AbstractModel,
 
             # mBART models
-            ModelEnum.MBART50: MbartAbstractModel,
+            ModelEnum.MBART50: Mbart50Model,
 
             # SinBERT models
             ModelEnum.SINBERT_SMALL: SinBertAbstractModel,
