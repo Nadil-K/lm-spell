@@ -1,5 +1,5 @@
 import unittest
-from LMSpell1 import LMSpell
+from LMSpell import LMSpell
 from Models.Mbart.MbartAbstractModel import MbartAbstractModel
 from Exceptions.InvalidModelException import InvalidModelException
 from ModelEnum import ModelEnum
