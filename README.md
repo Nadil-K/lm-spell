@@ -1,7 +1,5 @@
 # LMSpell
 
- is a modular spell correction library designed for fine-tuning and evaluating transformer-based models on spelling correction tasks. It supports various trainer strategies and provides flexibility for multilingual and domain-specific use cases.
-
 **LMSpell** is a flexible and extensible library designed to facilitate the implementation of spell correction systems using a wide range of pre-trained language models (PLMs). It supports encoder-based, decoder-based (i.e. LLMs), and encoder-decoder-based models, providing broad compatibility across diverse architectures.
 
 The interface of LMSpell, abstracts core PLM functionalities such as fine-tuning and inference. This abstraction enables users to integrate and experiment with different model types without requiring model-specific implementation knowledge. Internally, LMSpell dynamically loads the appropriate classes based on the selected model, ensuring a consistent and user-friendly development experience.
@@ -32,7 +30,7 @@ A trainer class can be used to fine-tune a model. Three trainers have been provi
 #### a. Decoder-based
 
 ```python
-from Trainer.UnslothTrainer import UnslothTrainer
+from LMSpell.Trainer.UnslothTrainer import UnslothTrainer
 
 trainer = UnslothTrainer(
     model_instance=model_instance,
@@ -45,7 +43,7 @@ trainer = UnslothTrainer(
 #### b. Encoder-decoder-based
 
 ```python
-from Trainer.Seq2SeqTrainer import Seq2SeqTrainer
+from LMSpell.Trainer.Seq2SeqTrainer import Seq2SeqTrainer
 
 trainer = Seq2SeqTrainer(
     model_instance=model_instance,
@@ -59,7 +57,7 @@ trainer = Seq2SeqTrainer(
 #### c. Encoder-based
 
 ```python
-from Trainer.SeqLabelTrainer import SeqLabelTrainer
+from LMSpell.Trainer.SeqLabelTrainer import SeqLabelTrainer
 
 trainer = SeqLabelTrainer(
     model_instance=model_instance,
@@ -70,7 +68,7 @@ trainer = SeqLabelTrainer(
 )
 ```
 
-Call train() method on trainer to fine-tune the model
+Call train method on trainer to fine-tune the model
 
 ```python
 trainer.train()
@@ -85,9 +83,9 @@ test_set = pd.read_csv("test.csv")
 model_instance.correct(test_set)
 ```
 
-## 🧠 Supported Models
+##  Supported Models
 
-### 🔧 Fine-tuned Checkpoints  
+#### Fine-tuned Checkpoints  
 *Note: These checkpoints will be released upon acceptance of the paper.*
 
 #### LLaMA 3.1
@@ -125,7 +123,6 @@ model_instance.correct(test_set)
 - `FacebookAI/xlm-roberta-base`
 - `FacebookAI/xlm-roberta-large`
 
-## 📄 License
+## License
 
 This project is licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).  
-You are free to share, adapt, and build upon the material for any purpose, even commercially, as long as appropriate credit is given.
