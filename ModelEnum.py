@@ -9,13 +9,7 @@ class ModelEnum(Enum):
     Neural Spell Checker Library
     """
     # Fine-tuned models
-    LLAMA31_FT_SI = "surge-masks/llama-3.1-8b-ft-ssc"
-    GEMMA2_FT_SI = "surge-masks/gemma-2-9b-ft-ssc"
-    MT5_FT_SI = "surge-masks/mt5-base-ft-ssc"
-    MT5_XL_FT_SI = "surge-masks/mt5-xl-ft-ssc"
-    MBART_FT_SI = "surge-masks/mbart50-ft-ssc"
-    SINBERT_FT_SI = "surge-masks/sinbert-large-ft-ssc"
-    XLMR_FT_SI = "surge-masks/xlmr-base-ft-ssc"
+    # These checkpoints will be released upon the acceptance of the paper
 
     # Llama 3.1 models
     LLAMA_31_8B = "unsloth/Meta-Llama-3.1-8B-bnb-4bit"
@@ -72,13 +66,13 @@ class ModelEnum(Enum):
 
         modelClasses: Dict[ModelEnum, ModelAbstract] = {
             # Fine-tuned models
-            ModelEnum.LLAMA31_FT_SI: LlamaAbstractModel,
-            ModelEnum.GEMMA2_FT_SI: GemmaAbstractModel,
-            ModelEnum.MT5_FT_SI: Mt5AbstractModel,
-            ModelEnum.MT5_XL_FT_SI: Mt5AbstractModel,
-            ModelEnum.MBART_FT_SI: MbartAbstractModel,
-            ModelEnum.SINBERT_FT_SI: SinBertAbstractModel,
-            ModelEnum.XLMR_FT_SI: XlmrAbstractModel,
+            # ModelEnum.LLAMA31_FT_SI: LlamaAbstractModel,
+            # ModelEnum.GEMMA2_FT_SI: GemmaAbstractModel,
+            # ModelEnum.MT5_FT_SI: Mt5AbstractModel,
+            # ModelEnum.MT5_XL_FT_SI: Mt5AbstractModel,
+            # ModelEnum.MBART_FT_SI: MbartAbstractModel,
+            # ModelEnum.SINBERT_FT_SI: SinBertAbstractModel,
+            # ModelEnum.XLMR_FT_SI: XlmrAbstractModel,
 
             # Llama 3.1 models
             ModelEnum.LLAMA_31_8B: Llama318BModel,
