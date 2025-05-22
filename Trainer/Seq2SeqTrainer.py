@@ -20,8 +20,7 @@ class Seq2SeqTrainer:
             model_instance,
             train_path,
             val_path,
-            test_path,
-            exp_no,
+            exp_name,
             batch_size = 8,
             epochs = 20,
             lr = 1e-5,
@@ -44,8 +43,7 @@ class Seq2SeqTrainer:
         self.model_instance = model_instance
         self.train_path = train_path
         self.val_path = val_path
-        self.test_path = test_path
-        self.exp_no = exp_no
+        self.exp_name = exp_name
         self.batch_size = batch_size
         self.epochs = epochs
         self.lr = lr
@@ -131,7 +129,7 @@ class Seq2SeqTrainer:
                      self.accelerator.print(f"Token: {tok}, ID: {tokenizer.convert_tokens_to_ids(tok)}")
             
 
-        self.early_stopping = EarlyStopping(self.model_instance.exp_dir, self.epochs, self.patience, self.exp_no) #require to load the best model from the checkpoint
+        self.early_stopping = EarlyStopping(self.model_instance.exp_dir, self.epochs, self.patience, self.exp_name) #require to load the best model from the checkpoint
         self.criterion = CrossEntropyLoss()
         self.initialize_dataloader()
         self.optimizer = AdamW(model.parameters(), lr=self.lr)
@@ -168,7 +166,7 @@ class Seq2SeqTrainer:
 
     def initialize_dataloader(self):
         tokenizer = self.model_instance.tokenizer
-        dataset = DatasetUtils(train_path=self.train_path, val_path=self.val_path, test_path=self.test_path, dataset_size=self.dataset_size)
+        dataset = DatasetUtils(train_path=self.train_path, val_path=self.val_path, dataset_size=self.dataset_size)
 
         self.accelerator.print("Initializing Dataloaders")
         self.accelerator.print("Train dataset size:", dataset.train_dataset.shape)

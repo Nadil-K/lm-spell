@@ -78,7 +78,6 @@ class DecoderAbstract(ModelAbstract):
 
             pred_texts.append(pred_text)
         
-        print(pred_texts)
         output_texts = []
         for pred in pred_texts:
             match = re.search(r'### Output:\s*([^\n]+)', pred)
@@ -95,7 +94,6 @@ class DecoderAbstract(ModelAbstract):
 
         if evaluate_flag:
             results_df[result_col_names[2]] = input_set[dataset_col_names[1]].to_list()
-            print(results_df.columns)
             print("Evaluating the outputs...")
             EvaluateUtils.evaluate_from_dataframe(results_df, self.exp_dir)            
 
