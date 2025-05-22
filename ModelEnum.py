@@ -9,29 +9,23 @@ class ModelEnum(Enum):
     Neural Spell Checker Library
     """
     # Fine-tuned models
-    LLAMA31_FT_SI = "surge-masks/llama-3.1-8b-ft-ssc"
-    GEMMA2_FT_SI = "surge-masks/gemma-2-9b-ft-ssc"
-    MT5_FT_SI = "surge-masks/mt5-base-ft-ssc"
-    MT5_XL_FT_SI = "surge-masks/mt5-xl-ft-ssc"
-    MBART_FT_SI = "surge-masks/mbart50-ft-ssc"
-    SINBERT_FT_SI = "surge-masks/sinbert-large-ft-ssc"
-    XLMR_FT_SI = "surge-masks/xlmr-base-ft-ssc"
+    # These checkpoints will be released upon the acceptance of the paper
 
     # Llama 3.1 models
-    LLAMA_31_8B = "meta-llama/Llama-3.1-8B"
-    LLAMA_31_8B_INSTRUCT = "meta-llama/Llama-3.1-8B-Instruct"
+    LLAMA_31_8B = "unsloth/Meta-Llama-3.1-8B-bnb-4bit"
+    LLAMA_31_8B_INSTRUCT = "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit"
     
     # Llama 3.2 models
-    LLAMA_32_1B = "meta-llama/Llama-3.2-1B"
-    LLAMA_32_1B_INSTRUCT = "meta-llama/Llama-3.2-1B-Instruct"
-    LLAMA_32_3B = "meta-llama/Llama-3.2-3B"
-    LLAMA_32_3B_INSTRUCT = "meta-llama/Llama-3.2-3B-Instruct"
+    LLAMA_32_1B = "unsloth/Llama-3.2-1B-bnb-4bit"
+    LLAMA_32_1B_INSTRUCT = "unsloth/Llama-3.2-1B-Instruct-bnb-4bit"
+    LLAMA_32_3B = "unsloth/Llama-3.2-3B-bnb-4bit"
+    LLAMA_32_3B_INSTRUCT = "unsloth/Llama-3.2-3B-Instruct-bnb-4bit"
     
     # Gemma 2 models
-    GEMMA_2_2B = "google/gemma-2-2b"
-    GEMMA_2_2B_INSTRUCT = "google/gemma-2-2b-Instruct"
-    GEMMA_2_9B = "google/gemma-2-9b"
-    GEMMA_2_9B_INSTRUCT = "google/gemma-2-9b-Instruct"
+    GEMMA_2_2B = "unsloth/gemma-2-2b-bnb-4bit"
+    GEMMA_2_2B_INSTRUCT = "unsloth/gemma-2-2b-it-bnb-4bit"
+    GEMMA_2_9B = "unsloth/gemma-2-9b-bnb-4bit"
+    GEMMA_2_9B_INSTRUCT = "unsloth/gemma-2-9b-it-bnb-4bit"
 
     # MT5 models
     MT5_SMALL = "google/mt5-small"
@@ -64,19 +58,21 @@ class ModelEnum(Enum):
         from Models.Mt5.Mt5LargeModel import Mt5LargeModel
 
         from Models.Mbart.MbartAbstractModel import MbartAbstractModel
+        from Models.Mbart.Mbart50Model import Mbart50Model
+
         from Models.SinBert.SinBertAbstractModel import SinBertAbstractModel
         from Models.Xlmr.XlmrAbstractModel import XlmrAbstractModel
         # import other model classes as needed
 
         modelClasses: Dict[ModelEnum, ModelAbstract] = {
             # Fine-tuned models
-            ModelEnum.LLAMA31_FT_SI: LlamaAbstractModel,
-            ModelEnum.GEMMA2_FT_SI: GemmaAbstractModel,
-            ModelEnum.MT5_FT_SI: Mt5AbstractModel,
-            ModelEnum.MT5_XL_FT_SI: Mt5AbstractModel,
-            ModelEnum.MBART_FT_SI: MbartAbstractModel,
-            ModelEnum.SINBERT_FT_SI: SinBertAbstractModel,
-            ModelEnum.XLMR_FT_SI: XlmrAbstractModel,
+            # ModelEnum.LLAMA31_FT_SI: LlamaAbstractModel,
+            # ModelEnum.GEMMA2_FT_SI: GemmaAbstractModel,
+            # ModelEnum.MT5_FT_SI: Mt5AbstractModel,
+            # ModelEnum.MT5_XL_FT_SI: Mt5AbstractModel,
+            # ModelEnum.MBART_FT_SI: MbartAbstractModel,
+            # ModelEnum.SINBERT_FT_SI: SinBertAbstractModel,
+            # ModelEnum.XLMR_FT_SI: XlmrAbstractModel,
 
             # Llama 3.1 models
             ModelEnum.LLAMA_31_8B: Llama318BModel,
@@ -102,7 +98,7 @@ class ModelEnum(Enum):
             ModelEnum.MT5_XXL: Mt5AbstractModel,
 
             # mBART models
-            ModelEnum.MBART50: MbartAbstractModel,
+            ModelEnum.MBART50: Mbart50Model,
 
             # SinBERT models
             ModelEnum.SINBERT_SMALL: SinBertAbstractModel,
