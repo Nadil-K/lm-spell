@@ -34,7 +34,7 @@ class EncoderDecoderAbstract(ModelAbstract):
                 label = batch.get("labels") #this is only present when we are testing. its not there when we are predicting better to have a mechanism to prevent this
                 if batch.get("labels") is not None:
                     labels.extend(label)
-                originals.extend(original),  predictions.extend(prediction)
+                originals.extend(original), predictions.extend(prediction)
 
         results_df = self.decode(originals, predictions, labels)
 
