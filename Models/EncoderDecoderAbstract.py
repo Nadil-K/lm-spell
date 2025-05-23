@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from Utils.ConfigUtils import ConfigUtils
 from Utils.EvaluateUtils import EvaluateUtils
 from Models.ModelAbstract import ModelAbstract
-from Datasets.LMSpellDataset import LMSpellDataset
+from Data.LMSpellDataset import LMSpellDataset
 from Utils.PrePostProcessingUtils import PrePostProcessingUtils
 from LMSpellException import LMSpellException
 

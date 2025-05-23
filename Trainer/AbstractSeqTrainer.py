@@ -11,7 +11,7 @@ from Utils.GeneralUtils import GeneralUtils
 from Utils.DatasetUtils import DatasetUtils
 from Trainer.AbstractTrainer import AbstractTrainer
 from Trainer.Utils.EarlyStopping import EarlyStopping
-from Datasets.LMSpellDataset import LMSpellDataset
+from Data.LMSpellDataset import LMSpellDataset
 from transformers import DataCollatorForSeq2Seq, get_linear_schedule_with_warmup
 
 class AbstractSeqTrainer(AbstractTrainer):
