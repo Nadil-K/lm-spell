@@ -1,4 +1,4 @@
-class SeqLabelTrainer():
+from Trainer.AbstractSeqTrainer import AbstractSeqTrainer
 
-    def __init__(self):
+class SeqLabelTrainer(AbstractSeqTrainer):
         pass
