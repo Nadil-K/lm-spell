@@ -3,7 +3,7 @@ import pandas as pd
 import torch
 from unittest.mock import MagicMock
 
-from Datasets.Seq2SeqDataset import Seq2SeqDataset
+from Datasets.LMSpellDataset import LMSpellDataset
 
 @pytest.fixture
 def sample_df():
@@ -22,11 +22,11 @@ def mock_tokenizer():
     return tokenizer
 
 def test_len(sample_df, mock_tokenizer):
-    dataset = Seq2SeqDataset(sample_df, mock_tokenizer)
+    dataset = LMSpellDataset(sample_df, mock_tokenizer)
     assert len(dataset) == 2
 
 def test_getitem_structure(sample_df, mock_tokenizer):
-    dataset = Seq2SeqDataset(sample_df, mock_tokenizer)
+    dataset = LMSpellDataset(sample_df, mock_tokenizer)
     item = dataset[0]
     
     assert "input_ids" in item
@@ -36,5 +36,5 @@ def test_getitem_structure(sample_df, mock_tokenizer):
 
 
 def test_get_method(sample_df, mock_tokenizer):
-    dataset = Seq2SeqDataset(sample_df, mock_tokenizer)
+    dataset = LMSpellDataset(sample_df, mock_tokenizer)
     assert dataset.get() == 2

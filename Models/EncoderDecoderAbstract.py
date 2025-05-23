@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from Utils.ConfigUtils import ConfigUtils
 from Utils.EvaluateUtils import EvaluateUtils
 from Models.ModelAbstract import ModelAbstract
-from Datasets.Seq2SeqDataset import Seq2SeqDataset
+from Datasets.LMSpellDataset import LMSpellDataset
 from Utils.PrePostProcessingUtils import PrePostProcessingUtils
 from LMSpellException import LMSpellException
 
@@ -19,7 +19,7 @@ class EncoderDecoderAbstract(ModelAbstract):
 
         input_set, evaluate_flag = self.process_input(input_set, target_set)
 
-        dataset = Seq2SeqDataset(input_set, self.tokenizer, max_length)
+        dataset = LMSpellDataset(input_set, self.tokenizer, max_length)
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
         self.model.eval()
         originals, predictions, labels = [], [], []
