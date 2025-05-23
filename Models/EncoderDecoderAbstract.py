@@ -11,7 +11,7 @@ from LMSpellException import LMSpellException
 
 class EncoderDecoderAbstract(ModelAbstract):
     
-    def correct(self, max_length: int, batch_size: int, shuffle: bool, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None):
+    def correct(self, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None,  max_length: int = 128, batch_size: int = 8, shuffle: bool = False):
         """
         Corrects the text. The input set should be a string, a list of strings or a DataFrame.
         Perform the evaluation if the target set is provided.

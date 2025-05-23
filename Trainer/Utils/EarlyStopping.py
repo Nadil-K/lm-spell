@@ -4,7 +4,7 @@ from Utils.GeneralUtils import GeneralUtils
 
 class EarlyStopping():
 
-    def __init__(self, exp_dir, epochs, patience, exp_no, best_loss=np.inf):
+    def __init__(self, exp_dir, epochs, patience, exp_name, best_loss=np.inf):
         self.exp_dir = exp_dir
         self.best_loss = best_loss
         self.best_model = None
@@ -14,7 +14,7 @@ class EarlyStopping():
         self.no_improvement = 0
         self.patience = patience
         self.history = {'train_loss': [], 'val_loss': []}
-        self.exp_no = exp_no
+        self.exp_name = exp_name
 
     def step(self, train_loss, val_loss, model):
         self.history['train_loss'].append(train_loss)
@@ -54,7 +54,7 @@ class EarlyStopping():
         if self.best_model is not None: 
             print(f"Latest epoch folder path found: {self.best_model}")
             return self.best_model        
-        return self.find_latest_epoch_folder(f'exp_{self.exp_no}')
+        return self.find_latest_epoch_folder(f'exp_{self.exp_name}')
 
 
     @staticmethod
