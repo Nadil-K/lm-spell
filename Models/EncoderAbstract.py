@@ -11,19 +11,13 @@ from Utils.GeneralUtils import GeneralUtils
 class EncoderAbstract(ModelAbstract):
 
     def correct(self, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None, max_length: int = 128, batch_size: int = 8):
-
+        if max_length > 514:
+            print("Warning: max_length is set to 514, as it is the maximum length for XLMR models.")
+            max_length = 514
         input_set, evaluate_flag = self.process_input(input_set, target_set)
 
-        data_collator_test = DataCollatorForSeq2Seq(
-            tokenizer=self.tokenizer,
-            padding = "longest", # TODO: Chnage to max_length
-            max_length = max_length,
-            pad_to_multiple_of=8,
-            label_pad_token_id = self.tokenizer.pad_token_id
-        )
-
         dataset = LMSpellDataset(input_set, self.tokenizer, max_length)
-        dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=data_collator_test, shuffle=False, pin_memory=True)
+        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
 
         self.model = self.accelerator.prepare_model(self.model, evaluation_mode=True)
         dataloader = self.accelerator.prepare_data_loader(dataloader)
