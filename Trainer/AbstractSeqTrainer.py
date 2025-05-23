@@ -5,6 +5,7 @@ from torch.optim import AdamW
 from ModelEnum import ModelEnum
 from accelerate import Accelerator
 from torch.nn import CrossEntropyLoss
+from Data.LMDataLoader import LMDataLoader
 from torch.utils.data import DataLoader
 from Trainer.Utils.Metrics import Metrics
 from Utils.GeneralUtils import GeneralUtils
@@ -13,7 +14,6 @@ from Trainer.AbstractTrainer import AbstractTrainer
 from Trainer.Utils.EarlyStopping import EarlyStopping
 from Data.LMSpellDataset import LMSpellDataset
 from transformers import DataCollatorForSeq2Seq, get_linear_schedule_with_warmup
-
 class AbstractSeqTrainer(AbstractTrainer):
 
     def __init__(
@@ -169,33 +169,23 @@ class AbstractSeqTrainer(AbstractTrainer):
 
     def initialize_dataloader(self):
         tokenizer = self.model_instance.tokenizer
-        dataset = DatasetUtils(train_path=self.train_path, val_path=self.val_path, test_path=self.test_path, dataset_size=self.dataset_size)
 
-        self.accelerator.print("Initializing Dataloaders")
-        self.accelerator.print("Train dataset size:", dataset.train_dataset.shape)
-        self.accelerator.print("Validation dataset size:", dataset.val_dataset.shape)
-        self.accelerator.print("Test dataset size:", dataset.test_dataset.shape)
-        
-        train_dataset = self.dataset(dataset.train_dataset, tokenizer, self.train_max_length)
-        val_dataset = self.dataset(dataset.val_dataset, tokenizer, self.train_max_length)
-
-        data_collator_test = DataCollatorForSeq2Seq(
-            tokenizer=tokenizer,
-            padding = "longest", # TODO: Chnage to max_length
-            max_length = self.test_max_length,
-            pad_to_multiple_of=8,
-            label_pad_token_id = tokenizer.pad_token_id
+        dataloader = LMDataLoader(
+            tokenizer,
+            dataset=self.dataset, 
+            train_path=self.train_path, 
+            val_path=self.val_path, 
+            test_path=self.test_path, 
+            dataset_size=self.dataset_size, 
+            train_max_length=self.train_max_length, 
+            test_max_length=self.test_max_length, 
+            train_batch_size=self.train_batch_size, 
+            test_batch_size=self.test_batch_size
         )
 
-        train_dataloader = DataLoader(train_dataset, batch_size=self.train_batch_size, shuffle=False, pin_memory=True)
-        val_dataloader = DataLoader(val_dataset, batch_size=self.train_batch_size, shuffle=False, pin_memory=True)
-
-        test_dataset = self.dataset(dataset.test_dataset, tokenizer, self.test_max_length)
-        test_dataloader = DataLoader(test_dataset, batch_size=self.test_batch_size, collate_fn=data_collator_test, shuffle=False, pin_memory=True)
-        
-        self.train_dataloader = train_dataloader
-        self.val_dataloader = val_dataloader
-        self.test_dataloader = test_dataloader
+        self.train_dataloader = dataloader.train_dataloader
+        self.val_dataloader = dataloader.val_dataloader
+        self.test_dataloader = dataloader.test_dataloader
 
     def train_step(self, inputs, past_key_values = None):
         with self.accelerator.accumulate(self.model):

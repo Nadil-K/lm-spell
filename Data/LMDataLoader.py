@@ -1,7 +1,8 @@
 from Utils.DatasetUtils import DatasetUtils
 from Data.LMSpellDataset import LMSpellDataset
+from torch.utils.data import DataLoader
 
-class DataLoader:
+class LMDataLoader:
 
     def __init__(
             self,
