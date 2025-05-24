@@ -52,10 +52,17 @@ class DecoderAbstract(ModelAbstract):
         ### Output:
         {{}}"""
                 
-    def correct(self, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None):
+    def correct(self, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None, output_dir: str = 'outputs'):
+        """
+        Corrects the text. The input set should be a string, a list of strings or a DataFrame.
+        Perform the evaluation if the target set is provided.
+        """
         import re        
+        import os
         from tqdm import tqdm
         from unsloth import FastLanguageModel
+
+        os.makedirs(os.path.join(os.getcwd(), output_dir), exist_ok=True)
         
         input_set, evaluate_flag = self.process_input(input_set, target_set)
 
@@ -95,11 +102,11 @@ class DecoderAbstract(ModelAbstract):
         if evaluate_flag:
             results_df[result_col_names[2]] = input_set[dataset_col_names[1]].to_list()
             print("Evaluating the outputs...")
-            EvaluateUtils.evaluate_from_dataframe(results_df, self.exp_dir)            
+            EvaluateUtils.evaluate_from_dataframe(results_df, output_dir)            
 
         return results_df
 
-    def correctFromFile(self, src: str, target: str = None, evaluate_flag: bool = False):
+    def correctFromFile(self, src: str, target: str = None, evaluate_flag: bool = False, output_dir: str = 'outputs'):
         import pandas as pd
         """
         Corrects the text from a file. The file should be in the format of
@@ -117,4 +124,4 @@ class DecoderAbstract(ModelAbstract):
         else:
             raise LMSpellException("Unsupported file format. Only .csv and .txt are supported.") from None
                 
-        return self.correct(src, target, evaluate_flag)
+        return self.correct(src, target, evaluate_flag, output_dir)

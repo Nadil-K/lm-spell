@@ -18,7 +18,6 @@ def mock_model():
 
         model = Mt5LargeModel()
         model.device = "cpu"
-        model.exp_dir = "/tmp/test_exp"
         return model
 
 @patch("Models.EncoderDecoderAbstract.tqdm")

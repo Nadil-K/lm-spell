@@ -1,22 +1,23 @@
+import os
 import torch
 import pandas as pd
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 from Utils.ConfigUtils import ConfigUtils
 from Utils.EvaluateUtils import EvaluateUtils
+from LMSpellException import LMSpellException
 from Models.ModelAbstract import ModelAbstract
 from Data.LMSpellDataset import LMSpellDataset
 from Utils.PrePostProcessingUtils import PrePostProcessingUtils
-from LMSpellException import LMSpellException
 
 class EncoderDecoderAbstract(ModelAbstract):
     
-    def correct(self, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None,  max_length: int = 128, batch_size: int = 8, shuffle: bool = False):
+    def correct(self, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None, output_dir: str ="outputs",  max_length: int = 128, batch_size: int = 8, shuffle: bool = False):
         """
         Corrects the text. The input set should be a string, a list of strings or a DataFrame.
         Perform the evaluation if the target set is provided.
         """
-
+        os.makedirs(os.path.join(os.getcwd(), output_dir), exist_ok=True)
         input_set, evaluate_flag = self.process_input(input_set, target_set)
 
         dataset = LMSpellDataset(input_set, self.tokenizer, max_length)
@@ -36,7 +37,7 @@ class EncoderDecoderAbstract(ModelAbstract):
                     labels.extend(label)
                 originals.extend(original), predictions.extend(prediction)
 
-        results_df = self.decode(originals, predictions, labels)
+        results_df = self.decode(originals, predictions, labels, output_dir)
 
         if evaluate_flag:
             eval_df = results_df.iloc[:, :2].copy()
@@ -50,12 +51,12 @@ class EncoderDecoderAbstract(ModelAbstract):
             eval_df[ConfigUtils.get_results_columns()[2]] = target_col.reset_index(drop=True)
 
             print("Evaluating the outputs...")
-            EvaluateUtils.evaluate_from_dataframe(eval_df, self.exp_dir)
+            EvaluateUtils.evaluate_from_dataframe(eval_df, output_dir)
 
         return results_df
 
 
-    def decode(self, originals, predictions, labels):
+    def decode(self, originals, predictions, labels, output_dir):
         """
         Decode a tensor of tensors and save it to a file.
         """
@@ -96,11 +97,11 @@ class EncoderDecoderAbstract(ModelAbstract):
         for column in result_col_names:
             results_df[column] = PrePostProcessingUtils.clean_zwj(results_df[column])
 
-        PrePostProcessingUtils.save_dataframe(results_df, self.exp_dir)
+        PrePostProcessingUtils.save_dataframe(results_df, output_dir)
 
         return results_df
 
-    def correctFromFile(self, max_length: int, batch_size: int, shuffle: bool, src: str, target: str = None):
+    def correctFromFile(self, src: str, target: str = None, output_dir: str = "outputs", max_length: int = 128, batch_size: int = 8, shuffle: bool = False):
         """
         Corrects the text from a file. The file should be in the format of
         """
@@ -119,4 +120,4 @@ class EncoderDecoderAbstract(ModelAbstract):
         else:
             raise LMSpellException("Unsupported file format. Only .csv and .txt are supported.") from None
                 
-        return self.correct(max_length, batch_size, shuffle, src, target)
+        return self.correct(src, target, output_dir, max_length, batch_size, shuffle)

@@ -455,7 +455,7 @@ class EvaluateUtils:
         }
     
     @staticmethod
-    def evaluate_from_dataframe(df, exp_dir, replace=False):
+    def evaluate_from_dataframe(df, output_dir, replace=False):
         """
         Evaluate the model using a DataFrame containing source, predicted, and reference columns.
         """
@@ -466,15 +466,16 @@ class EvaluateUtils:
         preds = df[result_col_names[1]]
         refs = df[result_col_names[2]]
 
-        EvaluateUtils.process_results(EvaluateUtils.evaluate(srcs, preds, refs, replace), exp_dir)
+        EvaluateUtils.process_results(EvaluateUtils.evaluate(srcs, preds, refs, replace), output_dir)
     
     @staticmethod
-    def process_results(results, exp_dir):
+    def process_results(results, output_dir):
+        import os
         """
         Process the results DataFrame and save it to a CSV file.
         """
-
-        results_file_path = f"{exp_dir}/evaluation_results.txt"
+        
+        results_file_path = os.path.join(os.getcwd(), f"{output_dir}/evaluation_results.txt")
         with open(results_file_path, "w", encoding="utf-8") as file:
             for key, value in results.items():
                 file.write(f"{key}: {value}\n")

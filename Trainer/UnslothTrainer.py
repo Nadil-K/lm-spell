@@ -36,6 +36,7 @@ class UnslothTrainer(AbstractTrainer):
 
 
     def train(self):
+        os.environ["UNSLOTH_RETURN_LOGITS"] = "1"
 
         model_instance = self.model_instance
 
