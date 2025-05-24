@@ -43,7 +43,7 @@ def test_decode_function(mock_model):
          patch("Utils.PrePostProcessingUtils.PrePostProcessingUtils.clean_zwj", side_effect=lambda x: x), \
          patch("Utils.PrePostProcessingUtils.PrePostProcessingUtils.save_dataframe") as mock_save_dataframe:
 
-        mock_model.decode(originals, predictions, labels)
+        mock_model.decode(originals, predictions, labels, "test")
 
         mock_save_dataframe.assert_called_once()
         df_arg = mock_save_dataframe.call_args[0][0]
