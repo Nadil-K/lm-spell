@@ -55,7 +55,6 @@ class EncoderDecoderAbstract(ModelAbstract):
 
         return results_df
 
-
     def decode(self, originals, predictions, labels, output_dir):
         """
         Decode a tensor of tensors and save it to a file.
