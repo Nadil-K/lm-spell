@@ -71,7 +71,7 @@ class AbstractSeqTrainer(AbstractTrainer):
         )
         self.accelerator =  Accelerator(
             gradient_accumulation_steps=self.gradient_accumulation_steps,
-            deepspeed_plugin=deepspeed_plugin,
+            # deepspeed_plugin=deepspeed_plugin,
         )
         self.initialize_model_and_tokenizer()
         starting_epoch = 0
