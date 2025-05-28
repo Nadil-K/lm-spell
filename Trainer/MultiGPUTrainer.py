@@ -1,7 +1,12 @@
 
 import os
 from Data.LMSpellDataset import LMSpellDataset
-
+import multiprocessing as mp
+try:
+    mp.set_start_method("spawn", force=True)
+except RuntimeError:
+    print("Spawn method already set, continuing...") 
+    pass
 
 def _train(*args):
     from Trainer.Seq2SeqTrainer import Seq2SeqTrainer
@@ -57,13 +62,6 @@ class MultiGPUTrainer:
         self.patience = patience
     
     def train(self):
-        import multiprocessing as mp
-
-        try:
-            mp.set_start_method("spawn", force=True)
-        except RuntimeError:
-            print("Spawn method already set, continuing...") 
-            pass
         from accelerate import notebook_launcher
         
         # notebook_launcher(self._train, num_processes=ConfigUtils().get("accelerator.NUM_PROCESSES", 1))
