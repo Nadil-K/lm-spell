@@ -109,7 +109,7 @@ class AbstractSeqTrainer(AbstractTrainer):
     def train(self):
         from accelerate import notebook_launcher
         # notebook_launcher(self._train, num_processes=ConfigUtils().get("accelerator.NUM_PROCESSES", 1))
-        notebook_launcher(self._train, args = [], num_processes=2, mixed_precision = 'fp16')
+        notebook_launcher(self._train, num_processes=2, mixed_precision = 'fp16')
         
     def validate(self):
         self.accelerator.print("Validation Started")
