@@ -54,7 +54,7 @@ class MultiGPUTrainer:
         from accelerate import notebook_launcher
         # notebook_launcher(self._train, num_processes=ConfigUtils().get("accelerator.NUM_PROCESSES", 1))
         notebook_launcher(
-            train, 
+            _train, 
             args = (
                 self.model_instance,
                 self.train_path,
@@ -79,6 +79,6 @@ class MultiGPUTrainer:
             num_processes=2, 
             mixed_precision = 'fp16')    
     
-def train(*args):
+def _train(*args):
     trainer = Seq2SeqTrainer(*args)
     trainer.train()
