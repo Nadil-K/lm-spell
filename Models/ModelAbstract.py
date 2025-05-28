@@ -17,7 +17,7 @@ class ModelAbstract(ABC):
         - language
         '''
         self.seed = 42
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.language = 'Sinhala'   # get it dynamically
     
     @abstractmethod
