@@ -8,7 +8,7 @@ def train(*args):
     trainer = AbstractSeqTrainer(*args)
     trainer.train()
 
-class MultiGPUTrainer():
+class MultiGPUTrainer:
     def __init__(
             self,
             model_instance,
