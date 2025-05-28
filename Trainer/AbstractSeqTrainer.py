@@ -3,7 +3,6 @@ import torch
 from tqdm import tqdm
 from torch.optim import AdamW
 from ModelEnum import ModelEnum
-from accelerate import Accelerator
 from torch.nn import CrossEntropyLoss
 from Trainer.Utils.Metrics import Metrics
 from Utils.ConfigUtils import ConfigUtils
@@ -25,7 +24,6 @@ class AbstractSeqTrainer(AbstractTrainer):
             batch_size = 8,
             epochs = 20,
             lr = 1e-5,
-            accelerator = Accelerator(),
             dataset = LMSpellDataset,
             special_tokens_to_add = None,
             dataset_size = 1,
@@ -47,7 +45,6 @@ class AbstractSeqTrainer(AbstractTrainer):
         self.batch_size = batch_size
         self.epochs = epochs
         self.lr = lr
-        self.accelerator = accelerator
         self.dataset = dataset
         self.special_tokens_to_add = special_tokens_to_add
         self.dataset_size = dataset_size
@@ -64,9 +61,10 @@ class AbstractSeqTrainer(AbstractTrainer):
         self.step_counter = 0
         self.patience = patience
 
-    def train(self):
+    def _train(self):
+        from accelerate import Accelerator
         GeneralUtils.clean_memory()
-
+        self.accelerator =  Accelerator()
         self.initialize_model_and_tokenizer()
         starting_epoch = 0
         
@@ -101,6 +99,11 @@ class AbstractSeqTrainer(AbstractTrainer):
             if self.accelerator.check_trigger():
                     break
 
+    def train(self):
+        from accelerate import notebook_launcher
+        # notebook_launcher(self._train, num_processes=ConfigUtils().get("accelerator.NUM_PROCESSES", 1))
+        notebook_launcher(self._train, args = None, num_processes=2)
+        
     def validate(self):
         self.accelerator.print("Validation Started")
         GeneralUtils.clean_memory()
@@ -119,11 +122,11 @@ class AbstractSeqTrainer(AbstractTrainer):
         tokenizer = self.model_instance.tokenizer
 
         if self.special_tokens_to_add is not None:
-                tokenizer.add_special_tokens({'additional_special_tokens': self.special_tokens_to_add})
-                model.resize_token_embeddings(len(tokenizer))
-                self.accelerator.print("Added following special tokens:")
-                for tok in self.special_tokens_to_add:
-                     self.accelerator.print(f"Token: {tok}, ID: {tokenizer.convert_tokens_to_ids(tok)}")
+            tokenizer.add_special_tokens({'additional_special_tokens': self.special_tokens_to_add})
+            model.resize_token_embeddings(len(tokenizer))
+            self.accelerator.print("Added following special tokens:")
+            for tok in self.special_tokens_to_add:
+                    self.accelerator.print(f"Token: {tok}, ID: {tokenizer.convert_tokens_to_ids(tok)}")
             
         self.early_stopping = EarlyStopping(self.epochs, self.patience, self.exp_name) #require to load the best model from the checkpoint
         self.criterion = CrossEntropyLoss()
