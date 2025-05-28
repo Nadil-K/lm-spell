@@ -1,5 +1,6 @@
 from Trainer.AbstractSeqTrainer import AbstractSeqTrainer
-
+from Data.LMSpellDataset import LMSpellDataset
+import os
 class Seq2SeqTrainer(AbstractSeqTrainer):
     pass
 
