@@ -27,7 +27,7 @@ class EncoderAbstract(ModelAbstract):
         input_set, evaluate_flag = self.process_input(input_set, target_set)
 
         dataset = LMSpellDataset(input_set, self.tokenizer, max_length)
-        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, pin_memory=True)
+        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
 
         self.model = self.accelerator.prepare_model(self.model, evaluation_mode=True)
         dataloader = self.accelerator.prepare_data_loader(dataloader)
