@@ -3,8 +3,9 @@ import torch
 from trl import SFTTrainer, SFTConfig
 from unsloth import is_bfloat16_supported
 from Utils.DatasetUtils import DatasetUtils
+from Trainer.AbstractTrainer import AbstractTrainer
 
-class UnslothTrainer():
+class UnslothTrainer(AbstractTrainer):
     def __init__(
             self,
             model_instance, 
@@ -35,6 +36,7 @@ class UnslothTrainer():
 
 
     def train(self):
+        os.environ["UNSLOTH_RETURN_LOGITS"] = "1"
 
         model_instance = self.model_instance
 

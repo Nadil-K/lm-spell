@@ -1,11 +1,11 @@
-import pandas as pd
-from Utils.EvaluateUtils import EvaluateUtils
 import os
-from torch.utils.data import DataLoader
-from Utils.PrePostProcessingUtils import PrePostProcessingUtils
-from Utils.ConfigUtils import ConfigUtils
 import torch
+import pandas as pd
 from ModelEnum import ModelEnum
+from torch.utils.data import DataLoader
+from Utils.ConfigUtils import ConfigUtils
+from Utils.EvaluateUtils import EvaluateUtils
+from Utils.PrePostProcessingUtils import PrePostProcessingUtils
 
 class Metrics:
     def __init__(self, data_loader: DataLoader, exp_dir: str, ZWJ_Fix: bool = False, model: ModelEnum = ModelEnum.MBART50):
@@ -153,7 +153,6 @@ class Metrics:
 
         google_utils = GoogleUtils()
         google_utils.upload_folder(f'{current_path}/{self.exp_dir}')
-
 
     def print_results(self, eval_results, eval_with_replace):
         with open(f'{self.exp_dir}/Results-{self.exp_dir}.txt', 'w') as log_file:

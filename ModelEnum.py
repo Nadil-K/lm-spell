@@ -57,11 +57,11 @@ class ModelEnum(Enum):
         from Models.Mt5.Mt5AbstractModel import Mt5AbstractModel
         from Models.Mt5.Mt5LargeModel import Mt5LargeModel
 
-        from Models.Mbart.MbartAbstractModel import MbartAbstractModel
         from Models.Mbart.Mbart50Model import Mbart50Model
 
         from Models.SinBert.SinBertAbstractModel import SinBertAbstractModel
         from Models.Xlmr.XlmrAbstractModel import XlmrAbstractModel
+        from Models.Xlmr.XlmrLargeModel import XlmrLargeModel
         # import other model classes as needed
 
         modelClasses: Dict[ModelEnum, ModelAbstract] = {
@@ -106,7 +106,7 @@ class ModelEnum(Enum):
             
             # XLMR models
             ModelEnum.XLMR_BASE: XlmrAbstractModel,
-            ModelEnum.XLMR_LARGE: XlmrAbstractModel,
+            ModelEnum.XLMR_LARGE: XlmrLargeModel,
 
             # Add other model-class mappings here
         }

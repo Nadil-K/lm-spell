@@ -1,8 +1,11 @@
+import pandas as pd
 from torch.utils.data import Dataset
 from Utils.ConfigUtils import ConfigUtils
 
-class Seq2SeqDataset(Dataset):
+class LMSpellDataset(Dataset):
     def __init__(self, dataframe, tokenizer, max_length=128):
+        if not isinstance(dataframe, pd.DataFrame):
+            dataframe = pd.DataFrame(dataframe)
         self.dataframe = dataframe
         self.tokenizer = tokenizer
         self.max_length = max_length

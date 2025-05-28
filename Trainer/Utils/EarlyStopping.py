@@ -4,8 +4,7 @@ from Utils.GeneralUtils import GeneralUtils
 
 class EarlyStopping():
 
-    def __init__(self, exp_dir, epochs, patience, exp_name, best_loss=np.inf):
-        self.exp_dir = exp_dir
+    def __init__(self, epochs, patience, exp_name, best_loss=np.inf):
         self.best_loss = best_loss
         self.best_model = None
         self.total_epochs = epochs
@@ -15,6 +14,7 @@ class EarlyStopping():
         self.patience = patience
         self.history = {'train_loss': [], 'val_loss': []}
         self.exp_name = exp_name
+        self.exp_dir = os.path.join(os.getcwd(), self.exp_name)
 
     def step(self, train_loss, val_loss, model):
         self.history['train_loss'].append(train_loss)
