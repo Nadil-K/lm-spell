@@ -1,7 +1,14 @@
 
 import os
 from Data.LMSpellDataset import LMSpellDataset
-from Trainer.Seq2SeqTrainer import Seq2SeqTrainer
+
+
+def _train(*args):
+    from Trainer.Seq2SeqTrainer import Seq2SeqTrainer
+    print(type(args), args)
+
+    trainer = Seq2SeqTrainer(*args)
+    trainer.train()
 
 class MultiGPUTrainer:
     def __init__(
@@ -79,6 +86,3 @@ class MultiGPUTrainer:
             num_processes=2, 
             mixed_precision = 'fp16')    
     
-def _train(*args):
-    trainer = Seq2SeqTrainer(*args)
-    trainer.train()
