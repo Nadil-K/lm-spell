@@ -67,7 +67,7 @@ class AbstractSeqTrainer(AbstractTrainer):
         GeneralUtils.clean_memory()
         deepspeed_plugin = DeepSpeedPlugin(
             zero_stage=self.zero_stage,
-            cpu_offload=True if self.zero_stage == 3 else False,
+            # cpu_offload=True if self.zero_stage == 3 else False,
         )
         self.accelerator =  Accelerator(
             gradient_accumulation_steps=self.gradient_accumulation_steps,
