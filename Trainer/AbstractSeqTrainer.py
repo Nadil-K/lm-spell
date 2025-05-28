@@ -106,10 +106,12 @@ class AbstractSeqTrainer(AbstractTrainer):
             if self.accelerator.check_trigger():
                     break
 
-    def train(self):
+    def train(self, *kwrgs):
+        a = 2
+        b = 3
         from accelerate import notebook_launcher
         # notebook_launcher(self._train, num_processes=ConfigUtils().get("accelerator.NUM_PROCESSES", 1))
-        notebook_launcher(AbstractSeqTrainer._train, args = (), num_processes=2, mixed_precision = 'fp16', log_line_prefix_template = "Test")
+        notebook_launcher(self._train, args = (a, b, ), num_processes=2, mixed_precision = 'fp16', log_line_prefix_template = "Test")
         
     def validate(self):
         self.accelerator.print("Validation Started")
