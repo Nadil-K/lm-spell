@@ -5,8 +5,9 @@ from Data.LMSpellDataset import LMSpellDataset
 
 def _train(*args):
     from Trainer.Seq2SeqTrainer import Seq2SeqTrainer
-    print(type(args), args)
-
+    # print(type(args), args)
+    import torch.multiprocessing as mp
+    mp.set_start_method('spawn')
     trainer = Seq2SeqTrainer(*args)
     trainer.train()
 
