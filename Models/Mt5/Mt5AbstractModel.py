@@ -7,8 +7,10 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
         super().__init__()
         model_path = self.model_label.get_model_path()
         # self.model = MT5ForConditionalGeneration.from_pretrained(model_path).to(self.device)
-        self.model = MT5ForConditionalGeneration.from_pretrained(model_path)
-        self.tokenizer = T5TokenizerFast.from_pretrained(model_path)
+        # self.model = MT5ForConditionalGeneration.from_pretrained(model_path)
+        # self.tokenizer = T5TokenizerFast.from_pretrained(model_path)
+        self.model = None
+        self.tokenizer = None
     
     def load_model(self):
         pass
