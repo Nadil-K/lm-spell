@@ -62,9 +62,16 @@ class AbstractSeqTrainer(AbstractTrainer):
         self.patience = patience
 
     def _train(self):
-        from accelerate import Accelerator
+        from accelerate import Accelerator, DeepSpeedPlugin
         GeneralUtils.clean_memory()
-        self.accelerator =  Accelerator()
+        deepspeed_plugin = DeepSpeedPlugin(
+            zero_stage=self.zero_stage,
+            cpu_offload=True if self.zero_stage == 3 else False,
+        )
+        self.accelerator =  Accelerator(
+            gradient_accumulation_steps=self.gradient_accumulation_steps,
+            deepspeed_plugin=deepspeed_plugin,
+        )
         self.initialize_model_and_tokenizer()
         starting_epoch = 0
         
@@ -102,7 +109,7 @@ class AbstractSeqTrainer(AbstractTrainer):
     def train(self):
         from accelerate import notebook_launcher
         # notebook_launcher(self._train, num_processes=ConfigUtils().get("accelerator.NUM_PROCESSES", 1))
-        notebook_launcher(self._train, args = None, num_processes=2)
+        notebook_launcher(self._train, args = None, num_processes=2, mixed_precision = 'fp16')
         
     def validate(self):
         self.accelerator.print("Validation Started")
