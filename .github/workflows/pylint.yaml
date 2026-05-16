@@ -1,7 +1,6 @@
 name: Lint with pylint
 
 on:
-  if: false
   push:
     branches:
       - main
