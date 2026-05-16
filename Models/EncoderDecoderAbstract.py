@@ -102,8 +102,12 @@ class EncoderDecoderAbstract(ModelAbstract):
         return results_df
 
     def correctFromFile(self, src: str, target: str = None, output_dir: str = "outputs", max_length: int = 128, batch_size: int = 8, shuffle: bool = False):
+        import pandas as pd
         """
         Corrects the text from a file. The file should be in the format of
+        a CSV or TXT file. If the file is a CSV, it should have two columns: 'text' and 'expected'.
+        If the file is a TXT, it should have one line per sentence. If target is provided,
+        it will be used for evaluation. The output will be saved in the specified output directory.
         """
 
         if src.endswith('.csv'):

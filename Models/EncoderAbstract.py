@@ -116,14 +116,19 @@ class EncoderAbstract(ModelAbstract):
 
         return results_df
     
-    def correctFromFile(self, src: str, target: str = None, output_dir: str = "outputs", evaluate_flag: bool = False):
+    def correctFromFile(self, src: str, target: str = None, output_dir: str = "outputs", max_length: int = 128, batch_size: int = 8, shuffle: bool = False):
         import pandas as pd
         """
         Corrects the text from a file. The file should be in the format of
+        a CSV or TXT file. If the file is a CSV, it should have two columns: 'text' and 'expected'.
+        If the file is a TXT, it should have one line per sentence. If target is provided,
+        it will be used for evaluation. The output will be saved in the specified output directory.
         """
 
         if src.endswith('.csv'):
-            src = pd.read_csv(src)
+            df = pd.read_csv(src)
+            src = df[ConfigUtils.get_dataset_columns()[0]].tolist()
+            target = df[ConfigUtils.get_dataset_columns()[1]].tolist()
 
         elif src.endswith('.txt'):
             with open(src, 'r', encoding='utf-8') as file:
@@ -134,7 +139,7 @@ class EncoderAbstract(ModelAbstract):
         else:
             raise LMSpellException("Unsupported file format. Only .csv and .txt are supported.") from None
                 
-        return self.correct(src, target, output_dir, evaluate_flag)
+        return self.correct(src, target, output_dir, max_length, batch_size, shuffle)
     
     def load_model(self):
         pass
