@@ -125,7 +125,7 @@ model_instance.correct(test_set)
 
 ## Fine-tuned Models and Datasets
 
-Fine-tuned models and datasets: https://huggingface.co/lm-spell
+Fine-tuned models and datasets can be downloaded from [Huggingface](https://huggingface.co/lm-spell)
 
 ## License
 
