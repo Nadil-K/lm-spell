@@ -123,6 +123,10 @@ model_instance.correct(test_set)
 - `FacebookAI/xlm-roberta-base`
 - `FacebookAI/xlm-roberta-large`
 
+## Fine-tuned Models and Datasets
+
+Fine-tuned models and datasets: https://huggingface.co/lm-spell
+
 ## License
 
 This project is licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).  
