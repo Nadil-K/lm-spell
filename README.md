@@ -127,6 +127,10 @@ model_instance.correct(test_set)
 
 Fine-tuned models and datasets can be downloaded from [Huggingface](https://huggingface.co/lm-spell)
 
+## Demo App
+
+A demo app that can be used for Sinhala Spell Correction can be accessed from [URL](https://nisansads.staff.uom.lk/Projects/lm-spell-web-app/)
+
 ## License
 
 This project is licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).  
