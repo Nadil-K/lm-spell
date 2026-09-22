@@ -134,3 +134,16 @@ A demo app that can be used for Sinhala Spell Correction can be accessed from [U
 ## License
 
 This project is licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).  
+
+## Research Publication
+
+This project resulted in a research paper published at **MERCon 2026**, with the published version available through IEEE Xplore.
+
+**[LMSpell: Neural Spell Checking for Low-Resource Languages](https://ieeexplore.ieee.org/document/11691371)**
+
+* **Published in:** MERCon 2026
+* **Publisher:** IEEE
+* **IEEE Xplore:** [Read the published paper](https://ieeexplore.ieee.org/document/11691371)
+* **Preprint:** [Read the full paper on arXiv](https://arxiv.org/html/2512.05414v3)
+
+The arXiv preprint includes additional experiments that could not be included in the published paper due to length limitations.
