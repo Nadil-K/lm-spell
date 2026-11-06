@@ -1,5 +1,6 @@
-from lmspell.models.gemma.gemma_abstract_model import GemmaAbstractModel
 from lmspell.model_enum import ModelEnum
+from lmspell.models.gemma.gemma_abstract_model import GemmaAbstractModel
+
 
 class Gemma29BModel(GemmaAbstractModel):
 
@@ -13,18 +14,18 @@ class Gemma29BModel(GemmaAbstractModel):
         self.do_sample = True       # get as a parameter
 
         super().__init__()
-    
+
     def load_model(self):
         pass
-    
+
     def save_model(self):
         pass
-    
+
     def get_model_name(self):
         pass
-    
+
     def load_tokenizer(self):
         pass
-    
+
     def save_tokenizer(self):
         pass

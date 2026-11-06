@@ -1,18 +1,22 @@
 import os
-import torch
+
 import pandas as pd
-from tqdm import tqdm
+import torch
 from torch.utils.data import DataLoader
-from lmspell.utils.config_utils import ConfigUtils
-from lmspell.utils.evaluate_utils import EvaluateUtils
+from tqdm import tqdm
+
+from lmspell.data.lm_spell_dataset import LMSpellDataset
 from lmspell.exceptions import LMSpellException
 from lmspell.models.model_abstract import ModelAbstract
-from lmspell.data.lm_spell_dataset import LMSpellDataset
+from lmspell.utils.config_utils import ConfigUtils
+from lmspell.utils.evaluate_utils import EvaluateUtils
 from lmspell.utils.pre_post_processing_utils import PrePostProcessingUtils
 
+
 class EncoderDecoderAbstract(ModelAbstract):
-    
-    def correct(self, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None, output_dir: str ="outputs",  max_length: int = 128, batch_size: int = 8, shuffle: bool = False):
+
+    def correct(self, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None,
+                output_dir: str = "outputs", max_length: int = 128, batch_size: int = 8, shuffle: bool = False):
         """
         Corrects the text. The input set should be a string, a list of strings or a DataFrame.
         Perform the evaluation if the target set is provided.
@@ -32,10 +36,13 @@ class EncoderDecoderAbstract(ModelAbstract):
                     outputs = self.model(input_ids=batch["input_ids"], attention_mask=batch["attention_mask"], labels=batch["labels"])
                 original = batch["input_ids"]
                 prediction = torch.argmax(outputs.logits, dim=-1)
-                label = batch.get("labels") #this is only present when we are testing. its not there when we are predicting better to have a mechanism to prevent this
+                # Labels are only present when testing, not when predicting.
+                # It would be better to have a mechanism that handles this.
+                label = batch.get("labels")
                 if batch.get("labels") is not None:
                     labels.extend(label)
-                originals.extend(original), predictions.extend(prediction)
+                originals.extend(original)
+                predictions.extend(prediction)
 
         results_df = self.decode(originals, predictions, labels, output_dir)
 
@@ -47,6 +54,8 @@ class EncoderDecoderAbstract(ModelAbstract):
                 target_col = pd.Series(target_set)
             elif isinstance(target_set, str):
                 target_col = pd.Series([target_set])
+            else:
+                raise LMSpellException("Cannot evaluate: target_set must be a string, a list of strings or a DataFrame.")
 
             eval_df[ConfigUtils.get_results_columns()[2]] = target_col.reset_index(drop=True)
 
@@ -73,7 +82,7 @@ class EncoderDecoderAbstract(ModelAbstract):
             [PrePostProcessingUtils.remove_special_tokens(tokens.to(self.device), all_special_ids, special_token_tensor) for tokens in data]
             for data in (originals, predictions, labels)
         ]
-        
+
         originals_decoded, predictions_decoded, labels_decoded = [
             [self.tokenizer.decode(ids, skip_special_tokens=skip_special_tokens).replace('\n', '').strip() for ids in data]
             for data in (originals, predictions, labels)
@@ -101,8 +110,8 @@ class EncoderDecoderAbstract(ModelAbstract):
 
         return results_df
 
-    def correctFromFile(self, src: str, target: str = None, output_dir: str = "outputs", max_length: int = 128, batch_size: int = 8, shuffle: bool = False):
-        import pandas as pd
+    def correctFromFile(self, src: str, target: str = None, output_dir: str = "outputs", max_length: int = 128,
+                        batch_size: int = 8, shuffle: bool = False):
         """
         Corrects the text from a file. The file should be in the format of
         a CSV or TXT file. If the file is a CSV, it should have two columns: 'text' and 'expected'.
@@ -123,5 +132,5 @@ class EncoderDecoderAbstract(ModelAbstract):
                     target = file.readlines()
         else:
             raise LMSpellException("Unsupported file format. Only .csv and .txt are supported.") from None
-                
+
         return self.correct(src, target, output_dir, max_length, batch_size, shuffle)

@@ -1,6 +1,8 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from lmspell.model_enum import ModelEnum
 from lmspell.models.mt5.mt5_large_model import Mt5LargeModel
+
 
 @patch("lmspell.models.mt5.mt5_abstract_model.MT5ForConditionalGeneration.from_pretrained")
 @patch("lmspell.models.mt5.mt5_abstract_model.T5TokenizerFast.from_pretrained")

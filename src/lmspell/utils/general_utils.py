@@ -3,6 +3,7 @@ class GeneralUtils:
     @staticmethod
     def clean_memory():
         import gc
+
         import torch
 
         gc.collect() # Collect garbage
@@ -10,9 +11,9 @@ class GeneralUtils:
 
     @staticmethod
     def delete_folder(folder_path):
-        import shutil
         import os
-        
+        import shutil
+
         if os.path.exists(folder_path):
             shutil.rmtree(folder_path)
             print(f"Removed folder: {folder_path}")

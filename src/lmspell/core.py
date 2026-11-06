@@ -1,18 +1,18 @@
-from lmspell.model_enum import ModelEnum
 from lmspell.exceptions import InvalidModelException
-from lmspell.exceptions import EvaluateModelException
+from lmspell.model_enum import ModelEnum
+
 
 class LMSpell:
 
     def __init__(self, model):
-        
-        try: 
-            modelEnum = ModelEnum(model)
+
+        try:
+            model_enum = ModelEnum(model)
         except ValueError:
             raise InvalidModelException(f"Invalid model: {model}") from None
 
-        modelClass = modelEnum.getModelClass()
-        self._model = modelClass()
+        model_class = model_enum.getModelClass()
+        self._model = model_class()
 
     def __getattr__(self, name):
         return getattr(self._model, name)

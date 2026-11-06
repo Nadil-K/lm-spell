@@ -1,5 +1,6 @@
 from lmspell.models.encoder_abstract import EncoderAbstract
 
+
 class SinBertAbstractModel(EncoderAbstract):
     def __init__(self):
         print('SinBert Large Model')

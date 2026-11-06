@@ -1,6 +1,8 @@
-from lmspell.models.encoder_abstract import EncoderAbstract
-from transformers import AutoTokenizer, AutoConfig, XLMRobertaForMaskedLM
 from accelerate import Accelerator
+from transformers import AutoConfig, AutoTokenizer, XLMRobertaForMaskedLM
+
+from lmspell.models.encoder_abstract import EncoderAbstract
+
 
 class XlmrAbstractModel(EncoderAbstract):
     def __init__(self):

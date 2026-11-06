@@ -1,10 +1,13 @@
 import pandas as pd
+
+from lmspell.exceptions import LMSpellException
+from lmspell.models.model_abstract import ModelAbstract
 from lmspell.utils.config_utils import ConfigUtils
 from lmspell.utils.evaluate_utils import EvaluateUtils
-from lmspell.models.model_abstract import ModelAbstract
-from lmspell.exceptions import LMSpellException
+
 
 class DecoderAbstract(ModelAbstract):
+    do_sample: bool
 
     def __init__(self):
         import torch
@@ -12,7 +15,7 @@ class DecoderAbstract(ModelAbstract):
 
         super().__init__()
 
-        
+
         self.max_seq_length = 2048    # WHY!!!
         self.dtype = torch.float16 if torch.cuda.get_device_name(0).startswith('Tesla T4') else torch.bfloat16
         self.load_in_4bit = True    # Get as a parameter
@@ -44,6 +47,7 @@ class DecoderAbstract(ModelAbstract):
         self.model = model
         self.tokenizer = tokenizer
 
+        # pylint: disable-next=line-too-long
         self.PROMPT = f"""You are an expert {self.language} spell corrector. Below is a sentence in {self.language} language. It may or may not have a spelling mistake. Give the corrected output in {self.language}.
 
         ### Text:
@@ -51,24 +55,25 @@ class DecoderAbstract(ModelAbstract):
 
         ### Output:
         {{}}"""
-                
+
     def correct(self, input_set: list[str] | str | pd.DataFrame, target_set: list[str] | str | pd.DataFrame = None, output_dir: str = 'outputs'):
         """
         Corrects the text. The input set should be a string, a list of strings or a DataFrame.
         Perform the evaluation if the target set is provided.
         """
-        import re        
         import os
+        import re
+
         from tqdm import tqdm
         from unsloth import FastLanguageModel
 
         os.makedirs(os.path.join(os.getcwd(), output_dir), exist_ok=True)
-        
+
         input_set, evaluate_flag = self.process_input(input_set, target_set)
 
         dataset_col_names = ConfigUtils.get_dataset_columns()
-        
-        FastLanguageModel.for_inference(self.model) 
+
+        FastLanguageModel.for_inference(self.model)
         pred_texts = []
         generation_mode = self.model.generation_config.get_generation_mode()
         print(f"Generation mode: {generation_mode}")
@@ -84,7 +89,7 @@ class DecoderAbstract(ModelAbstract):
             pred_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
             pred_texts.append(pred_text)
-        
+
         output_texts = []
         for pred in pred_texts:
             match = re.search(r'### Output:\s*([^\n]+)', pred)
@@ -102,12 +107,11 @@ class DecoderAbstract(ModelAbstract):
         if evaluate_flag:
             results_df[result_col_names[2]] = input_set[dataset_col_names[1]].to_list()
             print("Evaluating the outputs...")
-            EvaluateUtils.evaluate_from_dataframe(results_df, output_dir)            
+            EvaluateUtils.evaluate_from_dataframe(results_df, output_dir)
 
         return results_df
 
     def correctFromFile(self, src: str, target: str = None, output_dir: str = "outputs"):
-        import pandas as pd
         """
         Corrects the text from a file. The file should be in the format of
         a CSV or TXT file. If the file is a CSV, it should have two columns: 'text' and 'expected'.
@@ -128,5 +132,5 @@ class DecoderAbstract(ModelAbstract):
                     target = file.readlines()
         else:
             raise LMSpellException("Unsupported file format. Only .csv and .txt are supported.") from None
-                
+
         return self.correct(src, target, output_dir)

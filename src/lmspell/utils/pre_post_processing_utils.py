@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 class PrePostProcessingUtils:
 
     ZWJ: str = '<ZWJ>'
@@ -24,9 +25,9 @@ class PrePostProcessingUtils:
         zwj_pattern = rf'{PrePostProcessingUtils.ZWJ}\s?'   # '<ZWJ>\s?'
 
         return input_data.replace(zwj_pattern, PrePostProcessingUtils.ZWJ_UNICODE, regex=True)
-    
+
     @staticmethod
-    def save_dataframe(df: 'pd.DataFrame', dir: str):
+    def save_dataframe(df: 'pd.DataFrame', output_dir: str):
         print(df.head(3))
-        df.to_excel(f'{dir}/test_results.xlsx', index=False)
-        df.to_csv(f'{dir}/test_results.csv', index=False)
+        df.to_excel(f'{output_dir}/test_results.xlsx', index=False)
+        df.to_csv(f'{output_dir}/test_results.csv', index=False)

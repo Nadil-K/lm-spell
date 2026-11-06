@@ -1,7 +1,9 @@
 import unittest
+
 from lmspell.model_enum import ModelEnum
 from lmspell.models.llama.llama31_8b_model import Llama318BModel
 from lmspell.models.mt5.mt5_large_model import Mt5LargeModel
+
 
 class ModelEnumTest(unittest.TestCase):
 
@@ -18,6 +20,6 @@ class ModelEnumTest(unittest.TestCase):
         self.assertIn("unsloth/Meta-Llama-3.1-8B-bnb-4bit", ModelEnum.get_supported_models())
         self.assertIn("unsloth/gemma-2-9b-bnb-4bit", ModelEnum.get_supported_models())
         self.assertIn("google/mt5-large", ModelEnum.get_supported_models())
-        
+
 if __name__ == '__main__':
     unittest.main()

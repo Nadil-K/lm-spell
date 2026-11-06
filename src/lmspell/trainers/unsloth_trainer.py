@@ -1,15 +1,18 @@
 import os
+
 import torch
-from trl import SFTTrainer, SFTConfig
+from trl import SFTConfig, SFTTrainer
 from unsloth import is_bfloat16_supported
-from lmspell.utils.dataset_utils import DatasetUtils
+
 from lmspell.trainers.abstract_trainer import AbstractTrainer
+from lmspell.utils.dataset_utils import DatasetUtils
+
 
 class UnslothTrainer(AbstractTrainer):
     def __init__(
             self,
-            model_instance, 
-            train_path, 
+            model_instance,
+            train_path,
             val_path,
             exp_name,
             batch_size = 4,
@@ -17,7 +20,7 @@ class UnslothTrainer(AbstractTrainer):
             gradient_accumulation_steps = 2,
             lr = 1e-4,
             saving_steps=100000,
-            dataset_size = 1, 
+            dataset_size = 1,
             load_in_4bit=True,
         ):
 
@@ -59,13 +62,13 @@ class UnslothTrainer(AbstractTrainer):
             labels = batch["input_ids"].clone()
             # Update the labels in the batch
             labels[labels == model_instance.tokenizer.pad_token_id] = -100
-            batch["labels"] = labels   
+            batch["labels"] = labels
 
             return batch
 
         training_args = SFTConfig(
             per_device_train_batch_size = self.batch_size,
-            per_device_eval_batch_size = self.batch_size,  
+            per_device_eval_batch_size = self.batch_size,
             gradient_accumulation_steps = self.gradient_accumulation_steps,
             warmup_steps = 5,
             num_train_epochs = self.epochs,
@@ -90,7 +93,7 @@ class UnslothTrainer(AbstractTrainer):
             max_seq_length = model_instance.max_seq_length,
             dataset_num_proc = os.cpu_count(),
         )
-        
+
         trainer = SFTTrainer(
             model = model_instance.model,
             tokenizer = model_instance.tokenizer,

@@ -52,6 +52,7 @@ llm = [
 dev = [
     "pytest>=8",
     "pytest-cov",
+    "pylint>=3",
     "build",
     "twine",
 ]
@@ -82,3 +83,15 @@ include = [
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.pylint.main]
+# Heavy / GPU-only third-party packages are not installed in the lint job, so
+# they are not imported or inspected (this also avoids torch's no-member false positives).
+ignored-modules = [
+    "torch", "transformers", "accelerate", "datasets", "pandas", "numpy", "tqdm",
+    "unsloth", "trl", "gdown", "requests", "diff_match_patch", "pytest",
+]
+fail-under = 8.0
+
+[tool.pylint.format]
+max-line-length = 150

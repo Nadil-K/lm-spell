@@ -1,10 +1,14 @@
-import os
 import json
+import mimetypes
+import os
+from typing import Optional, Tuple
+
 import gdown
 import requests
-import mimetypes
-from typing import Tuple, Optional
+
+from lmspell.exceptions import LMSpellException
 from lmspell.utils.config_utils import ConfigUtils
+
 
 class GoogleUtils:
 
@@ -26,7 +30,7 @@ class GoogleUtils:
                 "redirect_uris":["https://developers.google.com/oauthplayground"],
                 "javascript_origins":["https://developers.google.com"],
                 "refresh_token": REFRESH_TOKEN}}
-        
+
         self.headers = self.set_headers()
         self.folder_id = config.get("google.FOLDER_ID") if folder_id is None else folder_id
 
@@ -44,7 +48,7 @@ class GoogleUtils:
         if 'access_token' in token_data:
             access_token = token_data['access_token']
         else:
-            raise Exception(f"Failed to refresh access token: {token_data}")
+            raise LMSpellException(f"Failed to refresh access token: {token_data}")
         return {
             "authorization": f"Bearer {access_token}",
         }
@@ -63,20 +67,16 @@ class GoogleUtils:
                 with open(file_path, "wb") as f:
                     f.write(response.content)
                 return response, file_path
-            else:
-                return response, None
-        except Exception as e:
+            return response, None
+        except Exception as e:  # pylint: disable=broad-exception-caught
             return e, None
 
     def download_file_by_ids(self, ids: list) -> None:
         """
         Downloads a list of files from Google Drive.
         """
-        for id in ids:
-            gdown.download(id=id, quiet=False)
-
-    import os
-    import requests
+        for file_id in ids:
+            gdown.download(id=file_id, quiet=False)
 
     def download_folder(self, folder_id: str, output_dir: str) -> None:
         """
@@ -97,11 +97,11 @@ class GoogleUtils:
                         subfolder_path = os.path.join(output_dir, file_name)
                         self.download_folder(file_id, subfolder_path)
                     else:
-                        file_response, file_path = self.download_file(file_id, os.path.join(output_dir, file_name))
+                        _, file_path = self.download_file(file_id, os.path.join(output_dir, file_name))
                         print(f"{file_path} Downloaded")
-            else:
-                return None, response.status_code
-        except Exception as e:
+                return None
+            return None, response.status_code
+        except Exception as e:  # pylint: disable=broad-exception-caught
             return e, None
 
 
@@ -115,19 +115,20 @@ class GoogleUtils:
                 "parents": [drive_folder_id]
             }
             if not os.path.exists(file_path):
-                raise Exception("File not found")
+                raise LMSpellException("File not found")
             file_type = mimetypes.guess_type(file_path)[0]
-            files = {
-                'data': ('metadata', json.dumps(params), 'application/json;charset=UTF-8'),
-                'file': (file_name, open(file_path, 'rb'), file_type)
-            }
-            res = requests.post(
-                'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
-                headers=self.headers,
-                files=files
-            )
+            with open(file_path, 'rb') as file_handle:
+                files = {
+                    'data': ('metadata', json.dumps(params), 'application/json;charset=UTF-8'),
+                    'file': (file_name, file_handle, file_type)
+                }
+                res = requests.post(
+                    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+                    headers=self.headers,
+                    files=files
+                )
             return res.json()['id']
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             return e
 
     def delete_file(self, file_id: str) -> requests.Response:

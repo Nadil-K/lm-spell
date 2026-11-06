@@ -6,6 +6,7 @@ Heavy dependencies (torch, transformers, unsloth) are imported lazily, so
 """
 
 from importlib import import_module
+from typing import TYPE_CHECKING
 
 from lmspell.exceptions import (
     EvaluateModelException,
@@ -14,6 +15,10 @@ from lmspell.exceptions import (
 )
 
 __version__ = "0.1.0"
+
+if TYPE_CHECKING:
+    from lmspell.core import LMSpell
+    from lmspell.model_enum import ModelEnum
 
 __all__ = [
     "LMSpell",

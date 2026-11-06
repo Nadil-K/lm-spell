@@ -1,6 +1,9 @@
-import numpy as np
 import os
+
+import numpy as np
+
 from lmspell.utils.general_utils import GeneralUtils
+
 
 class EarlyStopping():
 
@@ -19,7 +22,7 @@ class EarlyStopping():
     def step(self, train_loss, val_loss, model):
         self.history['train_loss'].append(train_loss)
         self.history['val_loss'].append(val_loss)
-        
+
         if val_loss < self.best_loss:
             self.best_loss = val_loss
             self.best_epoch = self.epoch
@@ -27,33 +30,32 @@ class EarlyStopping():
             self.no_improvement = 0
         else:
             self.no_improvement += 1
-            
+
         self.cleanup()
         if self.no_improvement >= self.patience or self.epoch >= self.total_epochs:
             return True  # Stop training
-        else:
-            self.epoch += 1
-            return False
-    
+        self.epoch += 1
+        return False
+
     def cleanup(self):
         if (self.epoch - self.patience - 1) > 0:
             pre_epoch_folder = os.path.join(self.exp_dir, f'epoch_{self.epoch - self.patience - 1}')
             GeneralUtils.delete_folder(pre_epoch_folder)
-        
-    
+
+
     def summary(self):
         for epoch in range(1, self.epoch + 1):
             if epoch != self.best_epoch:
                 epoch_folder = os.path.join(self.exp_dir, f'epoch_{epoch}')
                 GeneralUtils.delete_folder(epoch_folder)
-        
-        summary = "Stopped at epoch {}, best epoch was {}, best model was {} ".format(self.epoch, self.best_epoch, self.best_model)
+
+        summary = f"Stopped at epoch {self.epoch}, best epoch was {self.best_epoch}, best model was {self.best_model} "
         print(summary)
-        
+
     def get_best_model(self):
-        if self.best_model is not None: 
+        if self.best_model is not None:
             print(f"Latest epoch folder path found: {self.best_model}")
-            return self.best_model        
+            return self.best_model
         return self.find_latest_epoch_folder(f'exp_{self.exp_name}')
 
 
@@ -66,7 +68,7 @@ class EarlyStopping():
         print(f"Searching for epoch directories in {folder_name} in {current_path}.....")
         exp_dir_pattern = os.path.join(current_path, folder_name, "epoch_*")
         epoch_dirs = glob.glob(exp_dir_pattern)
-        
+
         if not epoch_dirs:
             print("No epoch directories found.")
             return None

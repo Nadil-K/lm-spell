@@ -1,5 +1,6 @@
-from lmspell.models.llama.llama_abstract_model import LlamaAbstractModel
 from lmspell.model_enum import ModelEnum
+from lmspell.models.llama.llama_abstract_model import LlamaAbstractModel
+
 
 class Llama318BModel(LlamaAbstractModel):
 
@@ -13,18 +14,18 @@ class Llama318BModel(LlamaAbstractModel):
         self.do_sample = True       # get as a parameter
 
         super().__init__()
-    
+
     def load_model(self):
         pass
-    
+
     def save_model(self):
         pass
-    
+
     def get_model_name(self):
         pass
-    
+
     def load_tokenizer(self):
         pass
-    
+
     def save_tokenizer(self):
         pass

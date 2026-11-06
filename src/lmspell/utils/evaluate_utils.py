@@ -1,7 +1,9 @@
 import re
-import pandas as pd
-from lmspell.utils.config_utils import ConfigUtils
+
 from diff_match_patch import diff_match_patch
+
+from lmspell.utils.config_utils import ConfigUtils
+
 
 class EvaluateUtils:
     @staticmethod
@@ -17,12 +19,12 @@ class EvaluateUtils:
         """
         la, lb = len(a), len(b)
         dp = [[0]*(lb+1) for _ in range(la+1)]
-        
+
         for i in range(la+1):
             dp[i][0] = i
         for j in range(lb+1):
             dp[0][j] = j
-        
+
         for i in range(1, la+1):
             for j in range(1, lb+1):
                 cost = 0 if a[i-1] == b[j-1] else 1
@@ -49,7 +51,7 @@ class EvaluateUtils:
         m, n = len(source_words), len(target_words)
 
         dp = [[0]*(n+1) for _ in range(m+1)]
-        
+
         def insertion_cost(word):
             return len(word)
 
@@ -58,19 +60,19 @@ class EvaluateUtils:
 
         def substitution_cost(w1, w2):
             return EvaluateUtils.levenshtein_distance(w1, w2)
-        
+
         for i in range(m+1):
             for j in range(n+1):
                 if i == 0 and j == 0:
                     dp[i][j] = 0
-                elif i == 0: 
+                elif i == 0:
                     dp[i][j] = dp[i][j-1] + insertion_cost(target_words[j-1])
-                elif j == 0: 
+                elif j == 0:
                     dp[i][j] = dp[i-1][j] + deletion_cost(source_words[i-1])
                 else:
                     cost_sub = dp[i-1][j-1] + substitution_cost(source_words[i-1], target_words[j-1])
-                    cost_del = dp[i-1][j] + deletion_cost(source_words[i-1]) 
-                    cost_ins = dp[i][j-1] + insertion_cost(target_words[j-1]) 
+                    cost_del = dp[i-1][j] + deletion_cost(source_words[i-1])
+                    cost_ins = dp[i][j-1] + insertion_cost(target_words[j-1])
                     dp[i][j] = min(cost_sub, cost_del, cost_ins)
 
         aligned_source = []
@@ -86,14 +88,14 @@ class EvaluateUtils:
                     i -= 1
                     j -= 1
                     continue
-            
+
             if i > 0:
                 del_cost = dp[i-1][j] + deletion_cost(source_words[i-1])
                 if dp[i][j] == del_cost:
                     aligned_source.append("".join(f"+{ch}" for ch in source_words[i-1]))
                     i -= 1
                     continue
-            
+
             if j > 0:
                 ins_cost = dp[i][j-1] + insertion_cost(target_words[j-1])
                 if dp[i][j] == ins_cost:
@@ -118,7 +120,7 @@ class EvaluateUtils:
         num_gold_words = len(gold.split())
         normalized_original = EvaluateUtils.normalize_spaces(original)
         normalized_gold = EvaluateUtils.normalize_spaces(gold)
-        alignment_result = EvaluateUtils.align_texts(normalized_original, normalized_gold)     
+        alignment_result = EvaluateUtils.align_texts(normalized_original, normalized_gold)
         new_original = alignment_result['aligned_source']
         new_gold = alignment_result['aligned_target']
         modified_original = []
@@ -144,14 +146,14 @@ class EvaluateUtils:
                 num_org_words -= 1
                 num_gold_words -= 1
                 continue
-            elif o[0] == '-':
+            if o[0] == '-':
                 modified_original.append(o)
                 modified_original.append("- ")
                 i += 1
                 j += 1
                 num_gold_words -= 1
                 continue
-            elif o[0] == '+':
+            if o[0] == '+':
                 modified_original.append(o)
                 modified_original.append("+ ")
                 i += 1
@@ -192,9 +194,9 @@ class EvaluateUtils:
             j += 1
             if (num_org_words > 0) and (num_gold_words > 0):
                 modified_original.append(" ")
-            elif (not (num_org_words > 0)) and (num_gold_words > 0):
+            elif not num_org_words > 0 and num_gold_words > 0:
                 modified_original.append("- ")
-            elif (num_org_words > 0) and (not (num_gold_words > 0)):
+            elif num_org_words > 0 and not num_gold_words > 0:
                 modified_original.append("+ ")
 
         returning_text = ''.join(modified_original).strip()
@@ -202,7 +204,7 @@ class EvaluateUtils:
             returning_text = returning_text[:-1]
         elif returning_text[-1] == '-':
             returning_text = returning_text[:-1]
-            
+
         return returning_text
 
     @staticmethod
@@ -236,13 +238,13 @@ class EvaluateUtils:
         correction_recall = 0
         correction_precision = 0
         detection_accuracy = 0
-        detection_F1 = 0    
+        detection_F1 = 0
         detection_F0_5 = 0
         corrections_accuracy = 0
         corrections_F1 = 0
         corrections_F0_5 = 0
         replacements = 0
-        
+
         for src_single, pred_single, ref_single in zip(srcs, preds, refs):
             src_single = (src_single.strip('.')).strip()
             pred_single = (pred_single.strip('.')).strip()
@@ -283,7 +285,7 @@ class EvaluateUtils:
                         new_str.append(j)
                     prev1 = j
                     prev2 = prev1
-                
+
                 if i == 0:
                     src_single = ''.join(new_str)
                 elif i == 1:
@@ -316,7 +318,7 @@ class EvaluateUtils:
 
             d_tp, d_tn, d_fp, d_fn = 0, 0, 0, 0  # detection
             c_tp, c_tn, c_fp, c_fn = 0, 0, 0, 0  # correction
-                
+
             i = 0
             j = 0
             k = 0
@@ -330,7 +332,7 @@ class EvaluateUtils:
                     gold = ''
                 else:
                     gold = gold_edits_ps[j]
-                if k >= len(pred_edits_ps):   
+                if k >= len(pred_edits_ps):
                     pred = ''
                 else:
                     pred = pred_edits_ps[k]
@@ -409,7 +411,7 @@ class EvaluateUtils:
                         i += 1
                         j += 1
                         k += 1
-            
+
             d_tp_agg += d_tp
             d_tn_agg += d_tn
             d_fp_agg += d_fp
@@ -418,12 +420,12 @@ class EvaluateUtils:
             c_tn_agg += c_tn
             c_fp_agg += c_fp
             c_fn_agg += c_fn
-            
+
             d_recall = safe_division(d_tp, d_tp + d_fn)
             d_prec = safe_division(d_tp, d_fp + d_tp)
             c_recall = safe_division(c_tp, c_tp + c_fn)
             c_prec = safe_division(c_tp, c_fp + c_tp)
-    
+
             if (d_tp == 0) and (d_fn == 0) and (d_fp == 0):
                 d_recall = 1
                 d_prec = 1
@@ -453,7 +455,7 @@ class EvaluateUtils:
             'Correction F1': corrections_F1 / length,
             'Correction F0.5': corrections_F0_5 / length,
         }
-    
+
     @staticmethod
     def evaluate_from_dataframe(df, output_dir, replace=False):
         """
@@ -467,20 +469,20 @@ class EvaluateUtils:
         refs = df[result_col_names[2]]
 
         EvaluateUtils.process_results(EvaluateUtils.evaluate(srcs, preds, refs, replace), output_dir)
-    
+
     @staticmethod
     def process_results(results, output_dir):
-        import os
         """
         Process the results DataFrame and save it to a CSV file.
         """
-        
+        import os
+
         results_file_path = os.path.join(os.getcwd(), f"{output_dir}/evaluation_results.txt")
         with open(results_file_path, "w", encoding="utf-8") as file:
             for key, value in results.items():
                 file.write(f"{key}: {value}\n")
         print(f"Evaluation results saved to {results_file_path}")
-        
+
         print("Evaluation results: ")
         for key, value in results.items():
             print(f"{key}: {value}")
@@ -488,7 +490,7 @@ class EvaluateUtils:
     @staticmethod
     def print_in_tab_seperated_format(df):
         filtered_df = df[df['Without Replacement'].astype(str).str.contains(r"\.")]
-        row_data = "\t".join(
+        row_data = "\t".join(  # pylint: disable=unused-variable  # never printed (known issue C8)
             f"{float(wr):.2f}" if wr == wrp and not isinstance(wr, str) and not isinstance(wrp, str)
             else f"{float(wr):.2f}({float(wrp):.2f})" if not isinstance(wr, str) and not isinstance(wrp, str)
             else f"{wr}"  # fallback if values are strings

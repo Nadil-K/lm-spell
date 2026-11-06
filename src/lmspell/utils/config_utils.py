@@ -1,15 +1,16 @@
 import json
 import os
 
+
 class ConfigUtils:
 
     def __init__(self):
         if os.path.exists('LMSpellConfig.json'):
-            with open('LMSpellConfig.json', 'r') as f:
+            with open('LMSpellConfig.json', 'r', encoding='utf-8') as f:
                 self.config = json.load(f)
         else:
             self.config = {}
-   
+
     def get(self, key, default=None):
         keys = key.split('.')
         value = self.config
@@ -28,7 +29,7 @@ class ConfigUtils:
             config.get('dataset.inputs', 'text'),
             config.get('dataset.targets', 'expected')
         ]
-    
+
     @staticmethod
     def get_results_columns():
         config = ConfigUtils()

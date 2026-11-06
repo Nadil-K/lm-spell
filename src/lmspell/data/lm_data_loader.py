@@ -1,6 +1,8 @@
-from lmspell.utils.dataset_utils import DatasetUtils
-from lmspell.data.lm_spell_dataset import LMSpellDataset
 from torch.utils.data import DataLoader
+
+from lmspell.data.lm_spell_dataset import LMSpellDataset
+from lmspell.utils.dataset_utils import DatasetUtils
+
 
 class LMDataLoader:
 
@@ -22,9 +24,9 @@ class LMDataLoader:
         self.train_dataloader = None
         self.val_dataloader = None
         self.test_dataloader = None
-        
+
         dataset = DatasetUtils(train_path=train_path, val_path=val_path, test_path=test_path, dataset_size=dataset_size)
-        
+
         if dataset.train_dataset is not None:
             train_dataset = self.dataset(dataset.train_dataset, tokenizer, train_max_length)
             train_dataloader = DataLoader(train_dataset, batch_size=train_batch_size, shuffle=False, pin_memory=True)

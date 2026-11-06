@@ -29,10 +29,10 @@ def test_version_is_pep440():
 
 def test_lazy_public_api():
     import lmspell
+    import lmspell.trainers
     from lmspell.core import LMSpell
     from lmspell.model_enum import ModelEnum
     from lmspell.trainers.seq2seq_trainer import Seq2SeqTrainer
-    import lmspell.trainers
 
     assert lmspell.LMSpell is LMSpell
     assert lmspell.ModelEnum is ModelEnum

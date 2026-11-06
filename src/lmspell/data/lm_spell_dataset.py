@@ -1,6 +1,8 @@
 import pandas as pd
 from torch.utils.data import Dataset
+
 from lmspell.utils.config_utils import ConfigUtils
+
 
 class LMSpellDataset(Dataset):
     def __init__(self, dataframe, tokenizer, max_length=128):
@@ -20,6 +22,6 @@ class LMSpellDataset(Dataset):
         targets = self.tokenizer(item[dataset_columns[1]], return_tensors='pt', padding='max_length', truncation=True, max_length=self.max_length)
         inputs['labels'] = targets['input_ids']
         return {key: val.squeeze() for key, val in inputs.items()}
-    
+
     def get(self):
         return len(self.dataframe)

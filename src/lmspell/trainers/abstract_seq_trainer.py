@@ -1,18 +1,21 @@
 import os
+
 import torch
-from tqdm import tqdm
-from torch.optim import AdamW
-from lmspell.model_enum import ModelEnum
 from accelerate import Accelerator
 from torch.nn import CrossEntropyLoss
-from lmspell.trainers.utils.metrics import Metrics
-from lmspell.utils.config_utils import ConfigUtils
+from torch.optim import AdamW
+from tqdm import tqdm
+from transformers import get_linear_schedule_with_warmup
+
 from lmspell.data.lm_data_loader import LMDataLoader
-from lmspell.utils.general_utils import GeneralUtils
 from lmspell.data.lm_spell_dataset import LMSpellDataset
+from lmspell.model_enum import ModelEnum
 from lmspell.trainers.abstract_trainer import AbstractTrainer
 from lmspell.trainers.utils.early_stopping import EarlyStopping
-from transformers import get_linear_schedule_with_warmup
+from lmspell.trainers.utils.metrics import Metrics
+from lmspell.utils.config_utils import ConfigUtils
+from lmspell.utils.general_utils import GeneralUtils
+
 
 class AbstractSeqTrainer(AbstractTrainer):
 
@@ -63,17 +66,24 @@ class AbstractSeqTrainer(AbstractTrainer):
         self.val_dataloader = None
         self.step_counter = 0
         self.patience = patience
+        self.epoch = 0
+        self.metrics = None
+        self.early_stopping = None
+        self.criterion = None
+        self.optimizer = None
+        self.lr_scheduler = None
+        self.model = None
 
     def train(self):
         GeneralUtils.clean_memory()
 
         self.initialize_model_and_tokenizer()
         starting_epoch = 0
-        
+
         if self.resume_training:
             starting_epoch = self.resume_training_from
             self.accelerator.print(f"Resuming Training from Epoch {starting_epoch}")
-        
+
         for epoch in range(starting_epoch, self.epochs + starting_epoch):
             self.epoch = epoch
             self.model_instance.model.train()
@@ -82,13 +92,14 @@ class AbstractSeqTrainer(AbstractTrainer):
                 for inputs in pbar_train:
                     total_loss += self.train_step(inputs)
                     self.step_counter += 1
-                final_total_loss = self.accumulate_loss(total_loss, self.train_dataloader)        
+                final_total_loss = self.accumulate_loss(total_loss, self.train_dataloader)
 
             # Validation
-            self.metrics = Metrics(self.val_dataloader, self.exp_dir, ZWJ_Fix=(self.special_tokens_to_add is not None), model=self.model_instance.model_label)
-            final_val_loss, last_prediction = self.validate()
+            self.metrics = Metrics(self.val_dataloader, self.exp_dir, ZWJ_Fix=(self.special_tokens_to_add is not None),
+                                   model=self.model_instance.model_label)
+            final_val_loss, _ = self.validate()
             model_dir = self.save_model(epoch)
-            
+
             # End of Validation Cycle
             if self.accelerator.is_main_process:
                 training_time_tqdm = pbar_train.format_dict["elapsed"]
@@ -96,10 +107,10 @@ class AbstractSeqTrainer(AbstractTrainer):
                 if self.early_stopping.step(final_total_loss, final_val_loss, model_dir):
                     self.early_stopping.summary()
                     self.accelerator.set_trigger()
-            
-            self.accelerator.wait_for_everyone() 
+
+            self.accelerator.wait_for_everyone()
             if self.accelerator.check_trigger():
-                    break
+                break
 
     def validate(self):
         self.accelerator.print("Validation Started")
@@ -110,21 +121,21 @@ class AbstractSeqTrainer(AbstractTrainer):
             for inputs in pbar:
                 loss, prediction = self.validation_step(inputs)
                 total_val_loss += loss
-        
+
         final_val_loss = self.accumulate_loss(total_val_loss, self.val_dataloader)
         return final_val_loss, prediction
 
     def initialize_model_and_tokenizer(self):
-        model = self.model_instance.model            
+        model = self.model_instance.model
         tokenizer = self.model_instance.tokenizer
 
         if self.special_tokens_to_add is not None:
-                tokenizer.add_special_tokens({'additional_special_tokens': self.special_tokens_to_add})
-                model.resize_token_embeddings(len(tokenizer))
-                self.accelerator.print("Added following special tokens:")
-                for tok in self.special_tokens_to_add:
-                     self.accelerator.print(f"Token: {tok}, ID: {tokenizer.convert_tokens_to_ids(tok)}")
-            
+            tokenizer.add_special_tokens({'additional_special_tokens': self.special_tokens_to_add})
+            model.resize_token_embeddings(len(tokenizer))
+            self.accelerator.print("Added following special tokens:")
+            for tok in self.special_tokens_to_add:
+                self.accelerator.print(f"Token: {tok}, ID: {tokenizer.convert_tokens_to_ids(tok)}")
+
         self.early_stopping = EarlyStopping(self.epochs, self.patience, self.exp_name) #require to load the best model from the checkpoint
         self.criterion = CrossEntropyLoss()
         self.initialize_dataloader()
@@ -137,22 +148,20 @@ class AbstractSeqTrainer(AbstractTrainer):
 
         if self.lr_and_opt_path:
             self.accelerator.print(f"Loading Optimizer and Scheduler from {self.lr_and_opt_path}")
-            
+
             optimizer_state = torch.load(os.path.join(self.exp_dir, 'optimizer.pt'))
             scheduler_state = torch.load(os.path.join(self.exp_dir, 'scheduler.pt'))
             self.lr_scheduler.load_state_dict(scheduler_state)
             self.optimizer.load_state_dict(optimizer_state)
         else:
             self.accelerator.print("Default Optimizer(Adaw) and Scheduler(Linear Scheduler with Warmup) is used")
-        
+
         self.accelerator.register_for_checkpointing(self.lr_scheduler)
-        
+
         if self.model_instance.model_label in [ModelEnum.MT5_BASE, ModelEnum.MT5_XL]:
-            '''
-            When launching an trainijng through the CLI and error occurs when the model is passed accellerator.prepare. 
-            The error is fixed by making the layers contiguous. This error is not observed when the training is 
-            launch through notebook launcher.
-            '''
+            # When launching a training through the CLI, an error occurs when the model is passed to accelerator.prepare.
+            # The error is fixed by making the layers contiguous. This error is not observed when the training is
+            # launched through the notebook launcher.
             for _, param in model.named_parameters():
                 if not param.is_contiguous():
                     param.data = param.data.contiguous()
@@ -165,18 +174,18 @@ class AbstractSeqTrainer(AbstractTrainer):
 
         dataloader = LMDataLoader(
             tokenizer,
-            dataset=self.dataset, 
-            train_path=self.train_path, 
-            val_path=self.val_path, 
-            dataset_size=self.dataset_size, 
-            train_max_length=self.train_max_length, 
-            train_batch_size=self.train_batch_size, 
+            dataset=self.dataset,
+            train_path=self.train_path,
+            val_path=self.val_path,
+            dataset_size=self.dataset_size,
+            train_max_length=self.train_max_length,
+            train_batch_size=self.train_batch_size,
         )
 
         self.train_dataloader = dataloader.train_dataloader
         self.val_dataloader = dataloader.val_dataloader
 
-    def train_step(self, inputs, past_key_values = None):
+    def train_step(self, inputs, past_key_values = None):  # pylint: disable=unused-argument
         with self.accelerator.accumulate(self.model):
             outputs = self.model(input_ids=inputs['input_ids'], attention_mask=inputs['attention_mask'], labels=inputs['labels'])
             loss = outputs.loss
@@ -194,13 +203,14 @@ class AbstractSeqTrainer(AbstractTrainer):
         labels = inputs['labels']
         loss = outputs.loss
         gathered_original, gathered_predictions, gathered_labels = self.accelerator.gather_for_metrics((original, predictions, labels))
-        self.accelerator.wait_for_everyone() 
+        self.accelerator.wait_for_everyone()
         if self.accelerator.is_main_process:
             if post_processing:
                 gathered_original, gathered_predictions, gathered_labels = post_processing(gathered_original, gathered_predictions, gathered_labels)
-            self.metrics.evaluate(gathered_original, gathered_predictions, gathered_labels, self.model_instance.tokenizer, self.accelerator.device, self.epoch)
+            self.metrics.evaluate(gathered_original, gathered_predictions, gathered_labels, self.model_instance.tokenizer,
+                                  self.accelerator.device, self.epoch)
         return loss.detach().item(), predictions
-    
+
     def accumulate_loss(self, total_loss, dataloader):
         total_loss_t = torch.tensor(total_loss / len(dataloader)).to(self.accelerator.device)
         gathered_loss = self.accelerator.gather(total_loss_t)
@@ -208,13 +218,11 @@ class AbstractSeqTrainer(AbstractTrainer):
         final_total_loss = gathered_loss.mean()
         self.accelerator.print(f'loss:{final_total_loss:.6f}')
         return final_total_loss
-    
-    def save_model(self, epoch):
-        from lmspell.utils.config_utils import ConfigUtils
 
+    def save_model(self, epoch):
         self.accelerator.print("Saving Model")
         model_dir = f'{self.exp_dir}/epoch_{epoch + 1}'
-        
+
         os.makedirs(model_dir, exist_ok=True)
         unwrapped_model = self.accelerator.unwrap_model(self.model)
 
@@ -239,11 +247,11 @@ class AbstractSeqTrainer(AbstractTrainer):
         else:
             if self.accelerator.is_main_process:
                 raise AssertionError(f"Unsupported zero stage: {self.zero_stage}")
-        
-        self.accelerator.save(self.optimizer.state_dict(), os.path.join(self.exp_dir, f'optimizer.pt'))
-        self.accelerator.save(self.lr_scheduler.state_dict(), os.path.join(self.exp_dir, f'scheduler.pt'))
+
+        self.accelerator.save(self.optimizer.state_dict(), os.path.join(self.exp_dir, 'optimizer.pt'))
+        self.accelerator.save(self.lr_scheduler.state_dict(), os.path.join(self.exp_dir, 'scheduler.pt'))
         self.accelerator.print("Model Saved along with Optimizer and Scheduler")
         if self.accelerator.scaler is not None:
             self.accelerator.print("Saving Scaler State")
-            self.accelerator.save(self.accelerator.scaler.state_dict(), os.path.join(self.exp_dir, f'scaler.pt'))
-        return model_dir if self.accelerator.is_main_process else None 
+            self.accelerator.save(self.accelerator.scaler.state_dict(), os.path.join(self.exp_dir, 'scaler.pt'))
+        return model_dir if self.accelerator.is_main_process else None
