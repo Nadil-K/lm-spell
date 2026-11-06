@@ -1,7 +1,7 @@
 import unittest
-from ModelEnum import ModelEnum
-from Models.Llama.Llama318BModel import Llama318BModel
-from Models.Mt5.Mt5LargeModel import Mt5LargeModel
+from lmspell.model_enum import ModelEnum
+from lmspell.models.llama.llama31_8b_model import Llama318BModel
+from lmspell.models.mt5.mt5_large_model import Mt5LargeModel
 
 class ModelEnumTest(unittest.TestCase):
 

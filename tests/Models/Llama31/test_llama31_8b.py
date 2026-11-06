@@ -5,9 +5,9 @@
 # sys.modules["unsloth"] = MagicMock()
 # sys.modules["unsloth.FastLanguageModel"] = MagicMock()
 
-# from Models.Llama.Llama318BModel import Llama318BModel
-# from Models.DecoderAbstract import DecoderAbstract
-# from Models.ModelAbstract import ModelAbstract
+# from lmspell.models.llama.llama31_8b_model import Llama318BModel
+# from lmspell.models.decoder_abstract import DecoderAbstract
+# from lmspell.models.model_abstract import ModelAbstract
 
 # # Make a fixture for the Llama318BModel with mocks
 # @pytest.fixture(autouse=True, scope="module")

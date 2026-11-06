@@ -3,7 +3,7 @@ import pandas as pd
 import torch
 from unittest.mock import MagicMock
 
-from Data.LMSpellDataset import LMSpellDataset
+from lmspell.data.lm_spell_dataset import LMSpellDataset
 
 @pytest.fixture
 def sample_df():

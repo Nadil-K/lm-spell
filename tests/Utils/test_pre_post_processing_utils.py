@@ -3,7 +3,7 @@ import pandas as pd
 import tempfile
 import os
 
-from Utils.PrePostProcessingUtils import PrePostProcessingUtils
+from lmspell.utils.pre_post_processing_utils import PrePostProcessingUtils
 
 def test_remove_special_tokens():
     tokens = torch.tensor([1, 2, 3, 99, 100, 101])

@@ -1,5 +1,5 @@
 from unittest.mock import mock_open, patch
-from Utils.ConfigUtils import ConfigUtils
+from lmspell.utils.config_utils import ConfigUtils
 import json
 
 def test_get_configs():

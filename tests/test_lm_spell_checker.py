@@ -1,7 +1,7 @@
 import unittest
-from LMSpell import LMSpell
-from Exceptions.InvalidModelException import InvalidModelException
-from ModelEnum import ModelEnum
+from lmspell.core import LMSpell
+from lmspell.exceptions import InvalidModelException
+from lmspell.model_enum import ModelEnum
 
 class LMSpellTest(unittest.TestCase):
 

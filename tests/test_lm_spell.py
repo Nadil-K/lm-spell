@@ -1,8 +1,8 @@
 import unittest
-from LMSpell import LMSpell
-from Models.Mbart.MbartAbstractModel import MbartAbstractModel
-from Exceptions.InvalidModelException import InvalidModelException
-from ModelEnum import ModelEnum
+from lmspell.core import LMSpell
+from lmspell.models.mbart.mbart_abstract_model import MbartAbstractModel
+from lmspell.exceptions import InvalidModelException
+from lmspell.model_enum import ModelEnum
 
 class LMSpellTest(unittest.TestCase):
 

@@ -2,12 +2,12 @@ import pytest
 import torch
 import pandas as pd
 from unittest.mock import MagicMock, patch
-from Models.Mt5.Mt5LargeModel import Mt5LargeModel
+from lmspell.models.mt5.mt5_large_model import Mt5LargeModel
 
 @pytest.fixture
 def mock_model():
-    with patch("Models.Mt5.Mt5AbstractModel.MT5ForConditionalGeneration.from_pretrained") as mock_model_loader, \
-         patch("Models.Mt5.Mt5AbstractModel.T5TokenizerFast.from_pretrained") as mock_tokenizer_loader:
+    with patch("lmspell.models.mt5.mt5_abstract_model.MT5ForConditionalGeneration.from_pretrained") as mock_model_loader, \
+         patch("lmspell.models.mt5.mt5_abstract_model.T5TokenizerFast.from_pretrained") as mock_tokenizer_loader:
 
         mock_model_loader.return_value = MagicMock()
         mock_tokenizer = MagicMock()
@@ -20,14 +20,14 @@ def mock_model():
         model.device = "cpu"
         return model
 
-@patch("Models.EncoderDecoderAbstract.tqdm")
+@patch("lmspell.models.encoder_decoder_abstract.tqdm")
 def test_predict_single_input(mock_tqdm_module, mock_model):
 
     mock_model.decode = MagicMock()
     mock_model.correct(max_length=10, batch_size=1, shuffle=False, input_set="input example")
     mock_model.decode.assert_called_once()
 
-@patch("Models.EncoderDecoderAbstract.tqdm")
+@patch("lmspell.models.encoder_decoder_abstract.tqdm")
 def test_predict_multiple_inputs(mock_tqdm_module, mock_model):
 
     mock_model.decode = MagicMock()
@@ -39,9 +39,9 @@ def test_decode_function(mock_model):
     predictions = [torch.tensor([4, 5, 6])]
     labels = [torch.tensor([4, 5, 6])]
 
-    with patch("Utils.PrePostProcessingUtils.PrePostProcessingUtils.remove_special_tokens", side_effect=lambda tokens, all_ids, keep_ids: tokens), \
-         patch("Utils.PrePostProcessingUtils.PrePostProcessingUtils.clean_zwj", side_effect=lambda x: x), \
-         patch("Utils.PrePostProcessingUtils.PrePostProcessingUtils.save_dataframe") as mock_save_dataframe:
+    with patch("lmspell.utils.pre_post_processing_utils.PrePostProcessingUtils.remove_special_tokens", side_effect=lambda tokens, all_ids, keep_ids: tokens), \
+         patch("lmspell.utils.pre_post_processing_utils.PrePostProcessingUtils.clean_zwj", side_effect=lambda x: x), \
+         patch("lmspell.utils.pre_post_processing_utils.PrePostProcessingUtils.save_dataframe") as mock_save_dataframe:
 
         mock_model.decode(originals, predictions, labels, "test")
 
