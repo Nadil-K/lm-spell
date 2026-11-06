@@ -5,8 +5,6 @@
 #   pip install torch --index-url https://download.pytorch.org/whl/cpu
 #   pip install -e ".[dev]"
 #
-# Runtime dependencies are declared in pyproject.toml. End users should run
-# `pip install lmspell` (or `pip install "lmspell[llm]"`) instead.
 --extra-index-url https://download.pytorch.org/whl/cu121
 
 torch==2.5.1+cu121
