@@ -6,10 +6,32 @@ The interface of LMSpell, abstracts core PLM functionalities such as fine-tuning
 
 ## Installation
 
-Library will be publicaly released upon the acceptance of the paper
+Requires Python 3.10+.
 
 ```bash
-pip install LMSpell
+pip install lmspell
+```
+
+Decoder models (Llama, Gemma) and `UnslothTrainer` need the `llm` extra, which installs [Unsloth](https://github.com/unslothai/unsloth) and requires an NVIDIA GPU:
+
+```bash
+pip install "lmspell[llm]"
+```
+
+pip installs the default PyTorch build. For a specific CUDA version, install PyTorch first by following the [PyTorch install guide](https://pytorch.org/get-started/locally/), for example:
+
+```bash
+pip install torch --index-url https://download.pytorch.org/whl/cu121
+pip install lmspell
+```
+
+### From source (development)
+
+```bash
+git clone https://github.com/Nadil-K/lm-spell.git
+cd lm-spell
+pip install -e ".[dev]"      # add ,llm on a GPU machine
+python -m pytest
 ```
 
 ## Quick Start
@@ -17,7 +39,7 @@ pip install LMSpell
 ### 1. Initialize the Model
 
 ```python
-from LMSpell import LMSpell
+from lmspell import LMSpell
 
 # Initialize the LMSpell instance
 model_instance = LMSpell("unsloth/gemma-2-9b-bnb-4bit")
@@ -30,45 +52,44 @@ A trainer class can be used to fine-tune a model. Three trainers have been provi
 #### a. Decoder-based
 
 ```python
-from LMSpell.Trainer.UnslothTrainer import UnslothTrainer
+from lmspell.trainers import UnslothTrainer
 
 trainer = UnslothTrainer(
     model_instance=model_instance,
     train_path="train.csv",
     val_path="val.csv",
     exp_name="demo",
-    language="en"
 )
 ```
 #### b. Encoder-decoder-based
 
 ```python
-from LMSpell.Trainer.Seq2SeqTrainer import Seq2SeqTrainer
+from lmspell.trainers import Seq2SeqTrainer
 
 trainer = Seq2SeqTrainer(
     model_instance=model_instance,
     train_path="train.csv",
     val_path="val.csv",
     exp_name="demo",
-    language="en"
 )
 ```
 
 #### c. Encoder-based
 
 ```python
-from LMSpell.Trainer.SeqLabelTrainer import SeqLabelTrainer
+from lmspell.trainers import SeqLabelTrainer
 
 trainer = SeqLabelTrainer(
     model_instance=model_instance,
     train_path="train.csv",
     val_path="val.csv",
     exp_name="demo",
-    language="en"
 )
 ```
 
-Call train method on trainer to fine-tune the model
+Training and validation files are CSVs with a `text` column (input sentence) and an `expected` column (corrected sentence). You can change the column names in `LMSpellConfig.json`; see `LMSpellConfig.json.example`.
+
+Call the `train` method on the trainer to fine-tune the model:
 
 ```python
 trainer.train()

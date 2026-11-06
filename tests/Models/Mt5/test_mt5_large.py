@@ -1,9 +1,11 @@
-from unittest.mock import patch, MagicMock
-from ModelEnum import ModelEnum
-from Models.Mt5.Mt5LargeModel import Mt5LargeModel
+from unittest.mock import MagicMock, patch
 
-@patch("Models.Mt5.Mt5AbstractModel.MT5ForConditionalGeneration.from_pretrained")
-@patch("Models.Mt5.Mt5AbstractModel.T5TokenizerFast.from_pretrained")
+from lmspell.model_enum import ModelEnum
+from lmspell.models.mt5.mt5_large_model import Mt5LargeModel
+
+
+@patch("lmspell.models.mt5.mt5_abstract_model.MT5ForConditionalGeneration.from_pretrained")
+@patch("lmspell.models.mt5.mt5_abstract_model.T5TokenizerFast.from_pretrained")
 def test_initialize_model(mock_tokenizer, mock_model):
 
     mock_model_instance = MagicMock(name="mT5-large-mock")

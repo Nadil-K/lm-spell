@@ -1,6 +1,8 @@
-from unittest.mock import mock_open, patch
-from Utils.ConfigUtils import ConfigUtils
 import json
+from unittest.mock import mock_open, patch
+
+from lmspell.utils.config_utils import ConfigUtils
+
 
 def test_get_configs():
 
@@ -28,7 +30,7 @@ def test_get_bool_configs():
             "gemma": False
         }
     })
-    
+
     with patch("builtins.open", mock_open(read_data=mock_config_data)), patch("os.path.exists", return_value=True):
         config = ConfigUtils()
         assert config.get('fix_zwj.mbart') is True
