@@ -95,3 +95,7 @@ fail-under = 8.0
 
 [tool.pylint.format]
 max-line-length = 150
+
+[tool.mypy]
+# The package lives under src/ (so IDE mypy can resolve `import lmspell`).
+mypy_path = "src"

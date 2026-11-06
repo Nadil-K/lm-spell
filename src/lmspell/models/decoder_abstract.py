@@ -9,15 +9,20 @@ from lmspell.utils.evaluate_utils import EvaluateUtils
 class DecoderAbstract(ModelAbstract):
     do_sample: bool
 
-    def __init__(self):
+    def __init__(self, model_label=None, language="Sinhala"):
         import torch
         from unsloth import FastLanguageModel
 
-        super().__init__()
+        super().__init__(model_label, language)
 
+        # Models mapped straight to LlamaAbstractModel/GemmaAbstractModel do not set do_sample;
+        # use the same default as the concrete Llama318BModel/Gemma29BModel.
+        if not hasattr(self, "do_sample"):
+            self.do_sample = True
 
         self.max_seq_length = 2048    # WHY!!!
-        self.dtype = torch.float16 if torch.cuda.get_device_name(0).startswith('Tesla T4') else torch.bfloat16
+        is_t4 = torch.cuda.is_available() and torch.cuda.get_device_name(0).startswith('Tesla T4')
+        self.dtype = torch.float16 if is_t4 else torch.bfloat16
         self.load_in_4bit = True    # Get as a parameter
         self.attn_implementation = "flash_attention_2"
 
@@ -82,7 +87,7 @@ class DecoderAbstract(ModelAbstract):
             inputs = self.tokenizer(
                 [self.PROMPT.format(src, "")],
                 return_tensors="pt"
-            ).to("cuda")
+            ).to(self.device)
 
             outputs = self.model.generate(**inputs, max_new_tokens=self.max_seq_length, do_sample=self.do_sample, use_cache=True)
 
@@ -121,8 +126,10 @@ class DecoderAbstract(ModelAbstract):
 
         if src.endswith('.csv'):
             df = pd.read_csv(src)
-            src = df[ConfigUtils.get_dataset_columns()[0]].tolist()
-            target = df[ConfigUtils.get_dataset_columns()[1]].tolist()
+            input_col, target_col = ConfigUtils.get_dataset_columns()
+            src = df[input_col].tolist()
+            if target_col in df.columns:
+                target = df[target_col].tolist()
 
         elif src.endswith('.txt'):
             with open(src, 'r', encoding='utf-8') as file:

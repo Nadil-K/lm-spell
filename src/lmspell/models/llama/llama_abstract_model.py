@@ -2,9 +2,9 @@ from lmspell.models.decoder_abstract import DecoderAbstract
 
 
 class LlamaAbstractModel(DecoderAbstract):
-    def __init__(self):
+    def __init__(self, model_label=None, language="Sinhala"):
         # TODO
-        super().__init__()
+        super().__init__(model_label, language)
 
     def load_model(self):
         pass

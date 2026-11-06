@@ -9,6 +9,7 @@ from transformers import get_linear_schedule_with_warmup
 
 from lmspell.data.lm_data_loader import LMDataLoader
 from lmspell.data.lm_spell_dataset import LMSpellDataset
+from lmspell.exceptions import LMSpellException
 from lmspell.model_enum import ModelEnum
 from lmspell.trainers.abstract_trainer import AbstractTrainer
 from lmspell.trainers.utils.early_stopping import EarlyStopping
@@ -81,6 +82,8 @@ class AbstractSeqTrainer(AbstractTrainer):
         starting_epoch = 0
 
         if self.resume_training:
+            if self.resume_training_from is None:
+                raise LMSpellException("resume_training=True needs resume_training_from (the epoch to resume from).")
             starting_epoch = self.resume_training_from
             self.accelerator.print(f"Resuming Training from Epoch {starting_epoch}")
 
@@ -149,8 +152,9 @@ class AbstractSeqTrainer(AbstractTrainer):
         if self.lr_and_opt_path:
             self.accelerator.print(f"Loading Optimizer and Scheduler from {self.lr_and_opt_path}")
 
-            optimizer_state = torch.load(os.path.join(self.exp_dir, 'optimizer.pt'))
-            scheduler_state = torch.load(os.path.join(self.exp_dir, 'scheduler.pt'))
+            state_dir = self.lr_and_opt_path if isinstance(self.lr_and_opt_path, str) else self.exp_dir
+            optimizer_state = torch.load(os.path.join(state_dir, 'optimizer.pt'))
+            scheduler_state = torch.load(os.path.join(state_dir, 'scheduler.pt'))
             self.lr_scheduler.load_state_dict(scheduler_state)
             self.optimizer.load_state_dict(optimizer_state)
         else:

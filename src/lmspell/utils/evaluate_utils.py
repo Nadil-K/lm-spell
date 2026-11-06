@@ -200,9 +200,7 @@ class EvaluateUtils:
                 modified_original.append("+ ")
 
         returning_text = ''.join(modified_original).strip()
-        if returning_text[-1] == '+':
-            returning_text = returning_text[:-1]
-        elif returning_text[-1] == '-':
+        if returning_text and returning_text[-1] in ('+', '-'):
             returning_text = returning_text[:-1]
 
         return returning_text
@@ -215,7 +213,6 @@ class EvaluateUtils:
 
     @staticmethod
     def evaluate(srcs, preds, refs, replace=False):
-        length = len(refs)
         z = 0
 
         if isinstance(srcs, str):
@@ -227,9 +224,12 @@ class EvaluateUtils:
             preds = list(preds)
             refs = list(refs)
 
-        srcs = [s.replace('\u00A0', ' ') for s in srcs]
-        preds = [p.replace('\u00A0', ' ') for p in preds]
-        refs = [r.replace('\u00A0', ' ') for r in refs]
+        length = len(refs)
+
+        # A missing prediction (e.g. an LLM output without "### Output:") counts as an empty sentence.
+        srcs = [("" if s is None else s).replace('\u00A0', ' ') for s in srcs]
+        preds = [("" if p is None else p).replace('\u00A0', ' ') for p in preds]
+        refs = [("" if r is None else r).replace('\u00A0', ' ') for r in refs]
 
         d_tp_agg, d_tn_agg, d_fp_agg, d_fn_agg = 0, 0, 0, 0  # detection
         c_tp_agg, c_tn_agg, c_fp_agg, c_fn_agg = 0, 0, 0, 0  # correction

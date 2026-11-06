@@ -64,7 +64,10 @@ class EncoderAbstract(ModelAbstract):
 
         if evaluate_flag and self.accelerator.is_main_process:
             eval_df = results_df.iloc[:, :2].copy()
-            if isinstance(target_set, pd.DataFrame):
+            if target_set is None:
+                # DataFrame input that carries its own target column.
+                target_col = input_set[ConfigUtils.get_dataset_columns()[1]]
+            elif isinstance(target_set, pd.DataFrame):
                 target_col = target_set.iloc[:, 0] if target_set.shape[1] > 0 else pd.Series([])
             elif isinstance(target_set, list):
                 target_col = pd.Series(target_set)
@@ -136,8 +139,10 @@ class EncoderAbstract(ModelAbstract):
 
         if src.endswith('.csv'):
             df = pd.read_csv(src)
-            src = df[ConfigUtils.get_dataset_columns()[0]].tolist()
-            target = df[ConfigUtils.get_dataset_columns()[1]].tolist()
+            input_col, target_col = ConfigUtils.get_dataset_columns()
+            src = df[input_col].tolist()
+            if target_col in df.columns:
+                target = df[target_col].tolist()
 
         elif src.endswith('.txt'):
             with open(src, 'r', encoding='utf-8') as file:

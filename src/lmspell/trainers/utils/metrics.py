@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from lmspell.model_enum import ModelEnum
+from lmspell.utils.config_utils import ConfigUtils
 from lmspell.utils.evaluate_utils import EvaluateUtils
 from lmspell.utils.pre_post_processing_utils import PrePostProcessingUtils
 
@@ -155,13 +156,14 @@ class Metrics:
         results_df.to_excel(f'{self.exp_dir}/test_results.xlsx', index=False)
         results_df.to_csv(f'{self.exp_dir}/test_results.csv', index=False)
 
-        current_path = os.getcwd()
-
-        google_utils = GoogleUtils()
-        google_utils.upload_folder(f'{current_path}/{self.exp_dir}')
+        if ConfigUtils().get("google.REFRESH_TOKEN"):
+            GoogleUtils().upload_folder(self.exp_dir)
+        else:
+            print("Google Drive is not configured in LMSpellConfig.json; skipping the upload.")
 
     def print_results(self, eval_results, eval_with_replace):
-        with open(f'{self.exp_dir}/Results-{self.exp_dir}.txt', 'w', encoding='utf-8') as log_file:
+        results_file = os.path.join(self.exp_dir, f'Results-{os.path.basename(self.exp_dir)}.txt')
+        with open(results_file, 'w', encoding='utf-8') as log_file:
             for metric, value in eval_results.items():
                 log_file.write(f"{metric}: {value}\n")
 

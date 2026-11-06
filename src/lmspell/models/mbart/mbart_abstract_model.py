@@ -7,8 +7,8 @@ from lmspell.models.mbart.language_codes import MBART50_LANG_CODE
 
 class MbartAbstractModel(EncoderDecoderAbstract):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, model_label=None, language="Sinhala"):
+        super().__init__(model_label, language)
         model_path = self.model_label.get_model_path()
         self.config = MBartConfig.from_pretrained(model_path)
         self.model = MBartForConditionalGeneration.from_pretrained(model_path, config=self.config, device_map='auto',
