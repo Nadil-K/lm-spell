@@ -21,7 +21,7 @@ class GoogleUtils:
         PROJECT_ID = config.get("google.PROJECT_ID")
 
         self.client_json = {"web":{
-                "client_id":"138516851437-86cqss3urm46bn5i08loq240i3g03o69.apps.googleusercontent.com",
+                "client_id":config.get("google.CLIENT_ID"),
                 "project_id":PROJECT_ID,
                 "auth_uri":"https://accounts.google.com/o/oauth2/auth",
                 "token_uri":"https://oauth2.googleapis.com/token",
@@ -181,10 +181,13 @@ class GoogleUtils:
         )
         return response
 
-    def upload_folder(self, local_folder_path: str, parent_folder_id: str = '1IlzJon8PASm_x9Pl8BS3outOBY0w2N9y') -> None:
+    def upload_folder(self, local_folder_path: str, parent_folder_id: str = None) -> None:
         """
         Uploads an entire folder from local machine to Google Drive.
+        Uploads into google.FOLDER_ID from the config unless parent_folder_id is given.
         """
+        if parent_folder_id is None:
+            parent_folder_id = self.folder_id
         base_folder_name = os.path.basename(local_folder_path)
         folder_id = self.create_folder(base_folder_name, parent_folder_id).json().get('id')
         for root, dirs, files in os.walk(local_folder_path):

@@ -4,6 +4,7 @@ from typing import Any
 import pandas as pd
 import torch
 
+from lmspell.exceptions import LMSpellException
 from lmspell.utils.config_utils import ConfigUtils
 
 
@@ -13,19 +14,21 @@ class ModelAbstract(ABC):
     tokenizer: Any
 
     @abstractmethod
-    def __init__(self):
+    def __init__(self, model_label=None, language="Sinhala"):
         '''
         Conctrete classes should define following attributes:
-        - model_label
+        - model_label (or receive it as an argument)
         - model
         - tokenizer
         - seed
         - max_seq_length
         - language
         '''
+        if model_label is not None:
+            self.model_label = model_label
         self.seed = 42
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.language = 'Sinhala'   # get it dynamically
+        self.language = language
 
     @abstractmethod
     def correct(self, input_set, target_set=None):
@@ -71,7 +74,24 @@ class ModelAbstract(ABC):
         dataset_col_names = ConfigUtils.get_dataset_columns()
 
         if isinstance(input_set, pd.DataFrame):
-            return input_set, True
+            if dataset_col_names[1] in input_set.columns:
+                return input_set, True
+            # No target column: add one (the dataset needs both columns), filled from target_set if given.
+            if target_set is None:
+                return input_set.assign(**{dataset_col_names[1]: ""}), False
+            if isinstance(target_set, pd.DataFrame):
+                targets = target_set.iloc[:, 0].tolist()
+            else:
+                targets = [target_set] if isinstance(target_set, str) else list(target_set)
+            if len(targets) != len(input_set):
+                raise LMSpellException(f"Got {len(input_set)} inputs but {len(targets)} targets.")
+            return input_set.assign(**{dataset_col_names[1]: targets}), True
+
+        if isinstance(input_set, list):
+            if not input_set or not all(isinstance(s, str) for s in input_set):
+                raise LMSpellException("input_set must be a non-empty list of strings.")
+        elif not isinstance(input_set, str):
+            raise LMSpellException("input_set must be a string, a list of strings or a DataFrame.")
 
         evaluate_flag = False
         data = []

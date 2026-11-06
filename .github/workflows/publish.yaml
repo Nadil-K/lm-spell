@@ -1,0 +1,97 @@
+name: Publish to PyPI
+
+#   * GitHub pre-release (e.g. tag v0.1.0rc1) -> TestPyPI
+#   * GitHub release     (e.g. tag v0.1.0)    -> PyPI
+#   * Manual run (workflow_dispatch)          -> the chosen target
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Where to publish"
+        required: true
+        default: testpypi
+        type: choice
+        options:
+          - testpypi
+          - pypi
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Build sdist and wheel
+      run: |
+        python -m pip install --upgrade pip build twine
+        python -m build
+        twine check --strict dist/*
+
+    - name: Check release tag matches package version
+      if: github.event_name == 'release'
+      run: |
+        VERSION="${GITHUB_REF_NAME#v}"
+        if [ ! -f "dist/lmspell-${VERSION}.tar.gz" ]; then
+          echo "Tag ${GITHUB_REF_NAME} does not match the built package:"; ls dist
+          echo "Update __version__ in src/lmspell/__init__.py or fix the tag."
+          exit 1
+        fi
+
+    - name: Upload distributions
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist
+        path: dist/
+
+  publish-testpypi:
+    needs: build
+    if: >-
+      (github.event_name == 'release' && github.event.release.prerelease) ||
+      (github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi')
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/lmspell
+    permissions:
+      id-token: write
+    steps:
+    - name: Download distributions
+      uses: actions/download-artifact@v4
+      with:
+        name: dist
+        path: dist/
+
+    - name: Publish to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+
+  publish-pypi:
+    needs: build
+    if: >-
+      (github.event_name == 'release' && !github.event.release.prerelease) ||
+      (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/lmspell
+    permissions:
+      id-token: write
+    steps:
+    - name: Download distributions
+      uses: actions/download-artifact@v4
+      with:
+        name: dist
+        path: dist/
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1

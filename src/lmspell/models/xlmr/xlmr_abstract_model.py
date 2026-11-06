@@ -5,8 +5,8 @@ from lmspell.models.encoder_abstract import EncoderAbstract
 
 
 class XlmrAbstractModel(EncoderAbstract):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, model_label=None, language="Sinhala"):
+        super().__init__(model_label, language)
         model_path = self.model_label.get_model_path()
         config = AutoConfig.from_pretrained(model_path)
         self.model = XLMRobertaForMaskedLM.from_pretrained(model_path, config=config)

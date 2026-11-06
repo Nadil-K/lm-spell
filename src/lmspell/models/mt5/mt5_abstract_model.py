@@ -5,8 +5,8 @@ from lmspell.models.encoder_decoder_abstract import EncoderDecoderAbstract
 
 class Mt5AbstractModel(EncoderDecoderAbstract):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, model_label=None, language="Sinhala"):
+        super().__init__(model_label, language)
         model_path = self.model_label.get_model_path()
         self.model = MT5ForConditionalGeneration.from_pretrained(model_path).to(self.device)
         self.tokenizer = T5TokenizerFast.from_pretrained(model_path)

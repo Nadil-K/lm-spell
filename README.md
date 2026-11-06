@@ -45,6 +45,12 @@ from lmspell import LMSpell
 model_instance = LMSpell("unsloth/gemma-2-9b-bnb-4bit")
 ```
 
+The language defaults to Sinhala. Set it with `language`. It's used in the LLM prompt and to pick the mBART-50 language code:
+
+```python
+model_instance = LMSpell("facebook/mbart-large-50", language="Hindi")
+```
+
 ### 2. Fine-tuning with a Trainer
 
 A trainer class can be used to fine-tune a model. Three trainers have been provided for decoder-based, encoder-decoder-based and encoder-based models.
