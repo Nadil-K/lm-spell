@@ -1,8 +1,26 @@
 __pycache__/
-*/__pycache__/
+*.py[cod]
 
 LMSpellConfig.json
 
+# Virtual environments
 myenv/
+.venv/
+venv/
+
+# Build / packaging artefacts
+build/
+dist/
+*.egg-info/
+
+# Tool caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Run outputs
+outputs/
 unsloth_compiled_cache/
 temp.ipynb

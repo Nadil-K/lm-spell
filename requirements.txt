@@ -1,10 +1,11 @@
+# GPU development environment (CUDA 12.1 wheels), including the LLM extra.
+#   pip install -r requirements.txt
+#
+# CPU-only / CI environment instead:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install -e ".[dev]"
+#
 --extra-index-url https://download.pytorch.org/whl/cu121
 
 torch==2.5.1+cu121
-transformers==4.51.3
-pandas==2.2.3
-pytest==8.3.5
-openpyxl==3.1.5
-unsloth==2025.4.1
-datasets==3.6.0
-diff-match-patch==20241021
+-e .[llm,dev]

@@ -1,9 +1,12 @@
-import pytest
-import pandas as pd
-import torch
+# pylint: disable=redefined-outer-name  # pytest fixtures
 from unittest.mock import MagicMock
 
-from Data.LMSpellDataset import LMSpellDataset
+import pandas as pd
+import pytest
+import torch
+
+from lmspell.data.lm_spell_dataset import LMSpellDataset
+
 
 @pytest.fixture
 def sample_df():
@@ -28,7 +31,7 @@ def test_len(sample_df, mock_tokenizer):
 def test_getitem_structure(sample_df, mock_tokenizer):
     dataset = LMSpellDataset(sample_df, mock_tokenizer)
     item = dataset[0]
-    
+
     assert "input_ids" in item
     assert "attention_mask" in item
     assert "labels" in item

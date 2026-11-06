@@ -1,0 +1,101 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lmspell"
+dynamic = ["version"]
+description = "Spell correction with pre-trained language models (encoder, decoder and encoder-decoder)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "CC-BY-4.0"
+license-files = ["LICENSE"]
+authors = [{ name = "LMSpell authors" }]
+keywords = ["spell-correction", "spell-checker", "nlp", "low-resource-languages", "sinhala", "transformers", "llm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
+]
+dependencies = [
+    "torch>=2.1",
+    # Pinned to the 4.46 series: newer releases broke the library (see commit da4438f).
+    "transformers~=4.46.3",
+    "accelerate>=0.26",
+    "datasets>=2.14",
+    "pandas>=2.0",
+    "numpy",
+    "tqdm",
+    "openpyxl>=3.1",
+    "diff-match-patch>=20230430",
+    # Needed by the mT5 / mBART-50 tokenizers.
+    "sentencepiece",
+    "protobuf",
+    # Google Drive utilities (lmspell.utils.google_utils).
+    "requests",
+    "gdown>=4.6",
+]
+
+[project.optional-dependencies]
+# Decoder models (Llama / Gemma) and UnslothTrainer. Requires an NVIDIA GPU.
+llm = [
+    "unsloth==2025.4.1",
+    "trl",
+]
+dev = [
+    "pytest>=8",
+    "pytest-cov",
+    "pylint>=3",
+    "build",
+    "twine",
+]
+all = ["lmspell[llm]"]
+
+[project.urls]
+Homepage = "https://github.com/Nadil-K/lm-spell"
+Repository = "https://github.com/Nadil-K/lm-spell"
+Issues = "https://github.com/Nadil-K/lm-spell/issues"
+Changelog = "https://github.com/Nadil-K/lm-spell/blob/main/CHANGELOG.md"
+
+[tool.hatch.version]
+path = "src/lmspell/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lmspell"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/lmspell",
+    "tests",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "LMSpellConfig.json.example",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.pylint.main]
+# Heavy / GPU-only third-party packages are not installed in the lint job, so
+# they are not imported or inspected (this also avoids torch's no-member false positives).
+ignored-modules = [
+    "torch", "transformers", "accelerate", "datasets", "pandas", "numpy", "tqdm",
+    "unsloth", "trl", "gdown", "requests", "diff_match_patch", "pytest",
+]
+fail-under = 8.0
+
+[tool.pylint.format]
+max-line-length = 150
+
+[tool.mypy]
+# The package lives under src/ (so IDE mypy can resolve `import lmspell`).
+mypy_path = "src"
