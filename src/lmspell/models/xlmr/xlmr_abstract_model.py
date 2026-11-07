@@ -19,4 +19,5 @@ class XlmrAbstractModel(EncoderAbstract):
         if self.special_tokens_to_add is not None:
             self.tokenizer.add_special_tokens({'additional_special_tokens': self.special_tokens_to_add})
 
+        self.enable_zwj_fix("xlmr")
         self.accelerator = Accelerator()

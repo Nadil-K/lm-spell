@@ -29,6 +29,24 @@ class ModelAbstract(ABC):
         self.seed = 42
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.language = language
+        self.zwj_fix = False
+
+    def enable_zwj_fix(self, config_key):
+        """
+        Turn on the ZWJ fix if fix_zwj.<config_key> in LMSpellConfig.json (or its default) says so.
+        These tokenizers drop the zero-width joiner (U+200D), so it is written as a <ZWJ> token
+        before tokenizing and turned back into U+200D after decoding.
+        """
+        from lmspell.utils.pre_post_processing_utils import PrePostProcessingUtils
+
+        self.zwj_fix = ConfigUtils.zwj_fix_enabled(config_key)
+        if not self.zwj_fix:
+            return
+        # Keep the existing additional special tokens (e.g. mBART's language codes).
+        self.tokenizer.add_special_tokens({'additional_special_tokens': [PrePostProcessingUtils.ZWJ]}, replace_additional_special_tokens=False)
+        # Grow the embeddings only if needed.
+        if len(self.tokenizer) > int(self.model.get_input_embeddings().num_embeddings):
+            self.model.resize_token_embeddings(len(self.tokenizer))
 
     @abstractmethod
     def correct(self, input_set, target_set=None):

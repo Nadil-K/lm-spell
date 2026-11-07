@@ -103,6 +103,8 @@ trainer = SeqLabelTrainer(
 
 Training and validation files are CSVs with a `text` column (input sentence) and an `expected` column (corrected sentence). You can change the column names in `LMSpellConfig.json`; see `LMSpellConfig.json.example`.
 
+**Zero-width joiner (ZWJ):** the mBART and mT5 tokenizers drop the zero-width joiner (U+200D) used in Sinhala, for example in ශ්‍රී. For these models LMSpell writes it as a `<ZWJ>` token before tokenizing, for both training and `correct()`, and turns it back into U+200D in the outputs. This is on by default for mBART, mT5 and mT5-XL, and off for the others; change it per model under `fix_zwj` in `LMSpellConfig.json`. A base model learns the new `<ZWJ>` token during fine-tuning.
+
 Call the `train` method on the trainer to fine-tune the model:
 
 ```python

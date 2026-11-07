@@ -18,6 +18,7 @@ class LMDataLoader:
             test_max_length = 128,
             train_batch_size = 16,
             test_batch_size = 16,
+            zwj_fix = False,
         ):
 
         self.dataset = dataset
@@ -25,7 +26,7 @@ class LMDataLoader:
         self.val_dataloader = None
         self.test_dataloader = None
 
-        dataset = DatasetUtils(train_path=train_path, val_path=val_path, test_path=test_path, dataset_size=dataset_size)
+        dataset = DatasetUtils(train_path=train_path, val_path=val_path, test_path=test_path, dataset_size=dataset_size, zwj_fix=zwj_fix)
 
         if dataset.train_dataset is not None:
             train_dataset = self.dataset(dataset.train_dataset, tokenizer, train_max_length)

@@ -38,7 +38,7 @@ class FakeTokenizer:
         input_ids = torch.tensor([ids])
         return {"input_ids": input_ids, "attention_mask": (input_ids != 0).long()}
 
-    def add_special_tokens(self, tokens):
+    def add_special_tokens(self, tokens, **_kwargs):
         for token in tokens["additional_special_tokens"]:
             self.all_special_ids.append(self.vocab.setdefault(token, len(self.vocab)))
 
@@ -68,6 +68,9 @@ class FakeSeq2SeqModel(nn.Module):
         logits = nn.functional.one_hot(labels, self.vocab_size).float() * 10 + self.proj(input_ids)
         loss = nn.functional.cross_entropy(logits.view(-1, self.vocab_size), labels.view(-1))
         return SimpleNamespace(loss=loss, logits=logits)
+
+    def get_input_embeddings(self):
+        return self.proj
 
     def resize_token_embeddings(self, new_size):  # pylint: disable=unused-argument
         return self.proj
