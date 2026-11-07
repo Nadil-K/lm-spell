@@ -41,6 +41,7 @@ class AbstractSeqTrainer(AbstractTrainer):
             lr_and_opt_path = None,
             resume_training_from = None,
             resume_training = False,
+            use_deepspeed = False,
         ):
         self.model_instance = model_instance
         self.train_path = train_path
@@ -61,6 +62,8 @@ class AbstractSeqTrainer(AbstractTrainer):
         self.lr_and_opt_path = lr_and_opt_path
         self.resume_training_from = resume_training_from
         self.resume_training = resume_training
+        self.use_deepspeed = use_deepspeed
+        self.accelerator = None
         self.train_dataloader = None
         self.val_dataloader = None
         self.step_counter = 0
@@ -74,13 +77,16 @@ class AbstractSeqTrainer(AbstractTrainer):
         self.model = None
 
     def train(self):
-        from accelerate import Accelerator, DeepSpeedPlugin
         GeneralUtils.clean_memory()
-        deepspeed_plugin = DeepSpeedPlugin(
-            zero_stage=self.zero_stage,
-            # cpu_offload=True if self.zero_stage == 3 else False,
-        )
-        self.accelerator =  Accelerator(
+        # DeepSpeed only when requested (MultiGPUTrainer does); it needs `pip install "lmspell[multigpu]"`.
+        deepspeed_plugin = None
+        if self.use_deepspeed:
+            from accelerate import DeepSpeedPlugin
+            deepspeed_plugin = DeepSpeedPlugin(
+                zero_stage=self.zero_stage,
+                # cpu_offload=True if self.zero_stage == 3 else False,
+            )
+        self.accelerator = Accelerator(
             gradient_accumulation_steps=self.gradient_accumulation_steps,
             deepspeed_plugin=deepspeed_plugin,
         )
