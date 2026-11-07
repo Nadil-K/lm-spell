@@ -2,7 +2,8 @@
 
 ``Seq2SeqTrainer`` / ``SeqLabelTrainer`` cover encoder-decoder and encoder
 models; ``UnslothTrainer`` covers decoder (LLM) models and needs the ``llm``
-extra (``pip install "lmspell[llm]"``). Imports are lazy so that importing one
+extra (``pip install "lmspell[llm]"``). ``MultiGPUTrainer`` runs ``Seq2SeqTrainer``
+on several GPUs with DeepSpeed and needs the ``multigpu`` extra. Imports are lazy so that importing one
 trainer does not pull in the dependencies of the others.
 """
 

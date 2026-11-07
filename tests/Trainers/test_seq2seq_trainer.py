@@ -28,3 +28,16 @@ def test_resume_without_start_epoch_raises(fake_tokenizer, fake_seq2seq_model, w
     trainer = Seq2SeqTrainer(model_instance=model_instance, train_path=path, val_path=path, exp_name="exp", resume_training=True)
     with pytest.raises(LMSpellException):
         trainer.train()
+
+
+def test_training_data_can_be_dataframes(fake_tokenizer, fake_seq2seq_model, isolated_cwd):
+    import pandas as pd
+
+    model_instance = SimpleNamespace(model=fake_seq2seq_model, tokenizer=fake_tokenizer, model_label=ModelEnum.MT5_LARGE)
+    frame = pd.DataFrame({"text": ["a quik fox", "the cat"], "expected": ["a quick fox", "the cat"]})
+
+    trainer = Seq2SeqTrainer(model_instance=model_instance, train_path=frame, val_path=frame,
+                             exp_name="exp", epochs=1, train_batch_size=2, train_max_length=8)
+    trainer.train()
+
+    assert (isolated_cwd / "exp" / "epoch_1" / "model.bin").exists()

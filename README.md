@@ -110,6 +110,28 @@ test_set = pd.read_csv("test.csv")
 model_instance.correct(test_set)
 ```
 
+### 4. Use a dataset from the Hugging Face Hub
+
+`DatasetUtils.load_hf_data` loads a CSV file from a Hugging Face dataset as a pandas DataFrame. The trainers accept a DataFrame wherever they take a CSV path (`train_path`, `val_path`), and `correct()` accepts one directly:
+
+```python
+from lmspell.trainers import Seq2SeqTrainer
+from lmspell.utils.dataset_utils import DatasetUtils
+
+repo = "lm-spell/sinhala-spell-correction-dataset"
+
+trainer = Seq2SeqTrainer(
+    model_instance=model_instance,
+    train_path=DatasetUtils.load_hf_data(repo, "train.csv"),
+    val_path=DatasetUtils.load_hf_data(repo, "val.csv"),
+    exp_name="demo",
+)
+
+model_instance.correct(DatasetUtils.load_hf_data(repo, "test_set_41p.csv"))
+```
+
+Gated or private datasets need a Hugging Face token from an account that has been granted access. Set it as `huggingface.TOKEN` in `LMSpellConfig.json`, set the `HF_TOKEN` environment variable, or run `huggingface-cli login`. The CSV columns must match the configured column names (`text` and `expected` by default).
+
 ##  Supported Models
 
 #### Fine-tuned Checkpoints  
