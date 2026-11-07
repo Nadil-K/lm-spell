@@ -19,6 +19,10 @@ class LMSpellTest(unittest.TestCase):
     def test_create_valid_model_instance(self, *_mocks):
         lm_spell = LMSpell("facebook/mbart-large-50")
         self.assertEqual(lm_spell.model_label, ModelEnum.MBART50)
+        # ZWJ fix: <ZWJ> is registered without replacing mBART's language codes.
+        self.assertTrue(lm_spell.zwj_fix)
+        lm_spell.tokenizer.add_special_tokens.assert_called_once_with(
+            {"additional_special_tokens": ["<ZWJ>"]}, replace_additional_special_tokens=False)
 
     def test_validate_model_name(self):
         invalid_model_name = "facebook/mbart-large-60"

@@ -47,3 +47,13 @@ def test_column_names_from_config_file(isolated_cwd):
     (isolated_cwd / "LMSpellConfig.json").write_text(json.dumps({"dataset": {"inputs": "noisy", "targets": "clean"}}),
                                                        encoding="utf-8")
     assert ConfigUtils.get_dataset_columns() == ["noisy", "clean"]
+
+
+def test_zwj_fix_defaults_and_override(isolated_cwd):
+    assert ConfigUtils.zwj_fix_enabled("mbart") is True
+    assert ConfigUtils.zwj_fix_enabled("mt5") is True
+    assert ConfigUtils.zwj_fix_enabled("xlmr") is False
+
+    (isolated_cwd / "LMSpellConfig.json").write_text(json.dumps({"fix_zwj": {"mbart": False, "xlmr": True}}), encoding="utf-8")
+    assert ConfigUtils.zwj_fix_enabled("mbart") is False
+    assert ConfigUtils.zwj_fix_enabled("xlmr") is True

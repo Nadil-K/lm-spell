@@ -42,3 +42,15 @@ def test_training_data_can_be_dataframes(fake_tokenizer, fake_seq2seq_model, iso
     trainer.train()
 
     assert (isolated_cwd / "exp" / "epoch_1" / "model.bin").exists()
+
+
+def test_training_data_is_zwj_converted_when_the_model_uses_the_fix(fake_tokenizer, fake_seq2seq_model, write_csv):
+    model_instance = SimpleNamespace(model=fake_seq2seq_model, tokenizer=fake_tokenizer,
+                                     model_label=ModelEnum.MT5_LARGE, zwj_fix=True)
+    path = write_csv("train.csv", ["ශ්‍රී"], ["ශ්‍රී"])
+
+    trainer = Seq2SeqTrainer(model_instance=model_instance, train_path=path, val_path=path, exp_name="exp", epochs=1)
+    trainer.train()
+
+    assert "ශ්<ZWJ>රී" in fake_tokenizer.vocab
+    assert trainer.metrics.ZWJ_Fix is True
