@@ -201,7 +201,7 @@ class AbstractSeqTrainer(AbstractTrainer):
         self.train_dataloader = dataloader.train_dataloader
         self.val_dataloader = dataloader.val_dataloader
 
-    def train_step(self, inputs, past_key_values = None):  # pylint: disable=unused-argument
+    def train_step(self, inputs):
         with self.accelerator.accumulate(self.model):
             outputs = self.model(input_ids=inputs['input_ids'], attention_mask=inputs['attention_mask'], labels=inputs['labels'])
             loss = outputs.loss
