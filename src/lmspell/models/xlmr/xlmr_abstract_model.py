@@ -14,10 +14,8 @@ class XlmrAbstractModel(EncoderAbstract):
         self.model.to(self.device)
 
         self.seperator_token = "</s>"
-        self.special_tokens_to_add=['<ZWJ>']
-
-        if self.special_tokens_to_add is not None:
-            self.tokenizer.add_special_tokens({'additional_special_tokens': self.special_tokens_to_add})
-
+        # As in the original XLM-R setup, <ZWJ> is always a token (and the embeddings grow to fit it);
+        # whether U+200D is converted to it is controlled by fix_zwj.xlmr.
+        self.add_zwj_token()
         self.enable_zwj_fix("xlmr")
         self.accelerator = Accelerator()
