@@ -13,7 +13,7 @@ license-files = ["LICENSE"]
 authors = [{ name = "LMSpell authors" }]
 keywords = ["spell-correction", "spell-checker", "nlp", "low-resource-languages", "sinhala", "transformers", "llm"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
