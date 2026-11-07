@@ -2,7 +2,8 @@
 
 ``Seq2SeqTrainer`` / ``SeqLabelTrainer`` cover encoder-decoder and encoder
 models; ``UnslothTrainer`` covers decoder (LLM) models and needs the ``llm``
-extra (``pip install "lmspell[llm]"``). Imports are lazy so that importing one
+extra (``pip install "lmspell[llm]"``). ``MultiGPUTrainer`` runs ``Seq2SeqTrainer``
+on several GPUs with DeepSpeed and needs the ``multigpu`` extra. Imports are lazy so that importing one
 trainer does not pull in the dependencies of the others.
 """
 
@@ -10,16 +11,18 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from lmspell.trainers.multi_gpu_trainer import MultiGPUTrainer
     from lmspell.trainers.seq2seq_trainer import Seq2SeqTrainer
     from lmspell.trainers.seq_label_trainer import SeqLabelTrainer
     from lmspell.trainers.unsloth_trainer import UnslothTrainer
 
-__all__ = ["Seq2SeqTrainer", "SeqLabelTrainer", "UnslothTrainer"]
+__all__ = ["Seq2SeqTrainer", "SeqLabelTrainer", "UnslothTrainer", "MultiGPUTrainer"]
 
 _LAZY_ATTRS = {
     "Seq2SeqTrainer": "lmspell.trainers.seq2seq_trainer",
     "SeqLabelTrainer": "lmspell.trainers.seq_label_trainer",
     "UnslothTrainer": "lmspell.trainers.unsloth_trainer",
+    "MultiGPUTrainer": "lmspell.trainers.multi_gpu_trainer",
 }
 
 

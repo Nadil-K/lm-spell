@@ -13,7 +13,7 @@ license-files = ["LICENSE"]
 authors = [{ name = "LMSpell authors" }]
 keywords = ["spell-correction", "spell-checker", "nlp", "low-resource-languages", "sinhala", "transformers", "llm"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
@@ -30,6 +30,7 @@ dependencies = [
     "transformers~=4.46.3",
     "accelerate>=0.26",
     "datasets>=2.14",
+    "huggingface_hub>=0.23",
     "pandas>=2.0",
     "numpy",
     "tqdm",
@@ -49,6 +50,10 @@ llm = [
     "unsloth==2025.4.1",
     "trl",
 ]
+# Multi-GPU training (MultiGPUTrainer) with DeepSpeed.
+multigpu = [
+    "deepspeed",
+]
 dev = [
     "pytest>=8",
     "pytest-cov",
@@ -56,7 +61,7 @@ dev = [
     "build",
     "twine",
 ]
-all = ["lmspell[llm]"]
+all = ["lmspell[llm,multigpu]"]
 
 [project.urls]
 Homepage = "https://github.com/Nadil-K/lm-spell"

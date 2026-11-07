@@ -29,7 +29,6 @@ class AbstractSeqTrainer(AbstractTrainer):
             batch_size = 8,
             epochs = 20,
             lr = 1e-5,
-            accelerator = Accelerator(),
             dataset = LMSpellDataset,
             special_tokens_to_add = None,
             dataset_size = 1,
@@ -42,6 +41,7 @@ class AbstractSeqTrainer(AbstractTrainer):
             lr_and_opt_path = None,
             resume_training_from = None,
             resume_training = False,
+            use_deepspeed = False,
         ):
         self.model_instance = model_instance
         self.train_path = train_path
@@ -51,7 +51,6 @@ class AbstractSeqTrainer(AbstractTrainer):
         self.batch_size = batch_size
         self.epochs = epochs
         self.lr = lr
-        self.accelerator = accelerator
         self.dataset = dataset
         self.special_tokens_to_add = special_tokens_to_add
         self.dataset_size = dataset_size
@@ -63,6 +62,8 @@ class AbstractSeqTrainer(AbstractTrainer):
         self.lr_and_opt_path = lr_and_opt_path
         self.resume_training_from = resume_training_from
         self.resume_training = resume_training
+        self.use_deepspeed = use_deepspeed
+        self.accelerator = None
         self.train_dataloader = None
         self.val_dataloader = None
         self.step_counter = 0
@@ -77,7 +78,18 @@ class AbstractSeqTrainer(AbstractTrainer):
 
     def train(self):
         GeneralUtils.clean_memory()
-
+        # DeepSpeed only when requested (MultiGPUTrainer does); it needs `pip install "lmspell[multigpu]"`.
+        deepspeed_plugin = None
+        if self.use_deepspeed:
+            from accelerate import DeepSpeedPlugin
+            deepspeed_plugin = DeepSpeedPlugin(
+                zero_stage=self.zero_stage,
+                # cpu_offload=True if self.zero_stage == 3 else False,
+            )
+        self.accelerator = Accelerator(
+            gradient_accumulation_steps=self.gradient_accumulation_steps,
+            deepspeed_plugin=deepspeed_plugin,
+        )
         self.initialize_model_and_tokenizer()
         starting_epoch = 0
 
@@ -189,7 +201,7 @@ class AbstractSeqTrainer(AbstractTrainer):
         self.train_dataloader = dataloader.train_dataloader
         self.val_dataloader = dataloader.val_dataloader
 
-    def train_step(self, inputs, past_key_values = None):  # pylint: disable=unused-argument
+    def train_step(self, inputs):
         with self.accelerator.accumulate(self.model):
             outputs = self.model(input_ids=inputs['input_ids'], attention_mask=inputs['attention_mask'], labels=inputs['labels'])
             loss = outputs.loss
