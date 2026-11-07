@@ -42,6 +42,10 @@ class FakeTokenizer:
         for token in tokens["additional_special_tokens"]:
             self.all_special_ids.append(self.vocab.setdefault(token, len(self.vocab)))
 
+    def save_pretrained(self, path):
+        with open(f"{path}/tokenizer.json", "w", encoding="utf-8") as file:
+            file.write(str(self.vocab))
+
     def convert_tokens_to_ids(self, token):
         return self.vocab.get(token, 1)
 

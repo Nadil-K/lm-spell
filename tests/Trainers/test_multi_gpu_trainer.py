@@ -48,7 +48,9 @@ def test_model_instance_is_rejected():
 
 
 def test_unknown_model_id_is_rejected():
-    with pytest.raises(LMSpellException, match="Invalid model"):
+    with patch("transformers.AutoConfig.from_pretrained", side_effect=OSError("not found")), \
+         patch("huggingface_hub.hf_hub_download", side_effect=OSError("not found")), \
+         pytest.raises(LMSpellException, match="Invalid model"):
         MultiGPUTrainer(model="google/mt5-huge", train_path="t", val_path="v", exp_name="e")
 
 

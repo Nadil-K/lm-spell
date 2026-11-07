@@ -22,7 +22,10 @@ class LMSpellTest(unittest.TestCase):
 
     def test_validate_model_name(self):
         invalid_model_name = "facebook/mbart-large-60"
-        with self.assertRaises(InvalidModelException) as context:
+        # Not a preset, so LMSpell looks for its config.json on the Hub; simulate "not found".
+        with patch("transformers.AutoConfig.from_pretrained", side_effect=OSError("not found")), \
+             patch("huggingface_hub.hf_hub_download", side_effect=OSError("not found")), \
+             self.assertRaises(InvalidModelException) as context:
             LMSpell(invalid_model_name)
         self.assertEqual(str(context.exception), f"Invalid model: {invalid_model_name}")
 

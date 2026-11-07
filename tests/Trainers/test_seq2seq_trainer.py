@@ -20,6 +20,7 @@ def test_one_epoch_saves_a_checkpoint(fake_tokenizer, fake_seq2seq_model, write_
     assert (isolated_cwd / "exp" / "epoch_1" / "model.bin").exists()
     assert (isolated_cwd / "exp" / "optimizer.pt").exists()
     assert (isolated_cwd / "exp" / "scheduler.pt").exists()
+    assert (isolated_cwd / "exp" / "epoch_1" / "tokenizer.json").exists()  # checkpoint can be loaded with LMSpell
 
 
 def test_resume_without_start_epoch_raises(fake_tokenizer, fake_seq2seq_model, write_csv):

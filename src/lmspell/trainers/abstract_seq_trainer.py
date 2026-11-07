@@ -264,6 +264,10 @@ class AbstractSeqTrainer(AbstractTrainer):
             if self.accelerator.is_main_process:
                 raise AssertionError(f"Unsupported zero stage: {self.zero_stage}")
 
+        # Save the tokenizer with the weights
+        if self.accelerator.is_main_process:
+            self.model_instance.tokenizer.save_pretrained(model_dir)
+
         self.accelerator.save(self.optimizer.state_dict(), os.path.join(self.exp_dir, 'optimizer.pt'))
         self.accelerator.save(self.lr_scheduler.state_dict(), os.path.join(self.exp_dir, 'scheduler.pt'))
         self.accelerator.print("Model Saved along with Optimizer and Scheduler")
