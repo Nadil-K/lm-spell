@@ -37,11 +37,14 @@ class ModelAbstract(ABC):
         These tokenizers drop the zero-width joiner (U+200D), so it is written as a <ZWJ> token
         before tokenizing and turned back into U+200D after decoding.
         """
+        self.zwj_fix = ConfigUtils.zwj_fix_enabled(config_key)
+        if self.zwj_fix:
+            self.add_zwj_token()
+
+    def add_zwj_token(self):
+        """Register <ZWJ> as a special token and make room for it in the model's embeddings."""
         from lmspell.utils.pre_post_processing_utils import PrePostProcessingUtils
 
-        self.zwj_fix = ConfigUtils.zwj_fix_enabled(config_key)
-        if not self.zwj_fix:
-            return
         # Keep the existing additional special tokens (e.g. mBART's language codes).
         self.tokenizer.add_special_tokens({'additional_special_tokens': [PrePostProcessingUtils.ZWJ]}, replace_additional_special_tokens=False)
         # Grow the embeddings only if needed.
