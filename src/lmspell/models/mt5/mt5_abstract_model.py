@@ -1,5 +1,6 @@
 from transformers import MT5ForConditionalGeneration, T5TokenizerFast
 
+from lmspell.model_enum import ModelEnum
 from lmspell.models.encoder_decoder_abstract import EncoderDecoderAbstract
 
 
@@ -11,6 +12,7 @@ class Mt5AbstractModel(EncoderDecoderAbstract):
         self.model = MT5ForConditionalGeneration.from_pretrained(model_path).to(self.device)
         self.tokenizer = T5TokenizerFast.from_pretrained(model_path)
         self.model.to(self.device)
+        self.enable_zwj_fix("mt5-xl" if self.model_label is ModelEnum.MT5_XL else "mt5")
 
     def load_model(self):
         pass

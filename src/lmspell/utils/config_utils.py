@@ -1,6 +1,8 @@
 import json
 import os
 
+ZWJ_FIX_DEFAULTS = {"mbart": True, "mt5": True, "mt5-xl": True}
+
 
 class ConfigUtils:
 
@@ -38,3 +40,8 @@ class ConfigUtils:
             config.get('results.predicted', 'Corrected'),
             config.get('results.expected', 'Expected')
         ]
+
+    @staticmethod
+    def zwj_fix_enabled(model_key):
+        """Whether the ZWJ fix is on for a model ("mbart", "mt5", "mt5-xl", "xlmr", "sinbert")."""
+        return bool(ConfigUtils().get(f'fix_zwj.{model_key}', ZWJ_FIX_DEFAULTS.get(model_key, False)))

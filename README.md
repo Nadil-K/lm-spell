@@ -51,6 +51,14 @@ The language defaults to Sinhala. Set it with `language`. It's used in the LLM p
 model_instance = LMSpell("facebook/mbart-large-50", language="Hindi")
 ```
 
+Besides the presets listed under [Supported Models](#supported-models), `LMSpell` accepts any Hugging Face checkpoint or local folder whose architecture it supports: mT5, mBART, XLM-RoBERTa, RoBERTa (e.g. SinBERT), Llama or Gemma. The architecture is read from the checkpoint's `config.json`. This includes models you fine-tuned yourself:
+
+```python
+model_instance = LMSpell("your-org/mt5-sinhala-finetuned")   # a model on the Hub
+model_instance = LMSpell("demo/epoch_3")                      # a checkpoint saved by Seq2SeqTrainer / SeqLabelTrainer
+model_instance = LMSpell("llama_demo")                        # a LoRA adapter saved by UnslothTrainer
+```
+
 ### 2. Fine-tuning with a Trainer
 
 A trainer class can be used to fine-tune a model. Three trainers have been provided for decoder-based, encoder-decoder-based and encoder-based models.
@@ -94,6 +102,8 @@ trainer = SeqLabelTrainer(
 ```
 
 Training and validation files are CSVs with a `text` column (input sentence) and an `expected` column (corrected sentence). You can change the column names in `LMSpellConfig.json`; see `LMSpellConfig.json.example`.
+
+**Zero-width joiner (ZWJ):** the mBART and mT5 tokenizers drop the zero-width joiner (U+200D) used in Sinhala, for example in ශ්‍රී. For these models LMSpell writes it as a `<ZWJ>` token before tokenizing, for both training and `correct()`, and turns it back into U+200D in the outputs. This is on by default for mBART, mT5 and mT5-XL, and off for the others; change it per model under `fix_zwj` in `LMSpellConfig.json`. A base model learns the new `<ZWJ>` token during fine-tuning.
 
 Call the `train` method on the trainer to fine-tune the model:
 

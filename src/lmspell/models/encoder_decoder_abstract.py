@@ -9,6 +9,7 @@ from lmspell.data.lm_spell_dataset import LMSpellDataset
 from lmspell.exceptions import LMSpellException
 from lmspell.models.model_abstract import ModelAbstract
 from lmspell.utils.config_utils import ConfigUtils
+from lmspell.utils.dataset_utils import DatasetUtils
 from lmspell.utils.evaluate_utils import EvaluateUtils
 from lmspell.utils.pre_post_processing_utils import PrePostProcessingUtils
 
@@ -24,7 +25,8 @@ class EncoderDecoderAbstract(ModelAbstract):
         os.makedirs(os.path.join(os.getcwd(), output_dir), exist_ok=True)
         input_set, evaluate_flag = self.process_input(input_set, target_set)
 
-        dataset = LMSpellDataset(input_set, self.tokenizer, max_length)
+        model_input = DatasetUtils.fix_zwj(input_set.copy()) if self.zwj_fix else input_set
+        dataset = LMSpellDataset(model_input, self.tokenizer, max_length)
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
         self.model.eval()
         originals, predictions, labels = [], [], []

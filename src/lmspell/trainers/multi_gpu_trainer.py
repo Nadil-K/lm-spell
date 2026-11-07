@@ -8,7 +8,7 @@ import os
 
 from lmspell.data.lm_spell_dataset import LMSpellDataset
 from lmspell.exceptions import LMSpellException
-from lmspell.model_enum import ModelEnum
+from lmspell.model_resolver import resolve_model
 
 # import multiprocessing as mp
 # try:
@@ -73,10 +73,7 @@ class MultiGPUTrainer:
             raise LMSpellException(
                 'MultiGPUTrainer needs the model id (e.g. "google/mt5-base"), not a model instance: '
                 "each GPU process loads its own copy.")
-        try:
-            ModelEnum(model)
-        except ValueError:
-            raise LMSpellException(f"Invalid model: {model}") from None
+        resolve_model(model) 
 
         self.model = model
         self.language = language

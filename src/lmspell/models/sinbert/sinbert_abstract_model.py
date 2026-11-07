@@ -14,4 +14,5 @@ class SinBertAbstractModel(EncoderAbstract):
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model.to(self.device)
 
+        self.enable_zwj_fix("sinbert")
         self.accelerator = Accelerator()

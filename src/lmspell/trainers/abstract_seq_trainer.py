@@ -110,8 +110,7 @@ class AbstractSeqTrainer(AbstractTrainer):
                 final_total_loss = self.accumulate_loss(total_loss, self.train_dataloader)
 
             # Validation
-            self.metrics = Metrics(self.val_dataloader, self.exp_dir, ZWJ_Fix=(self.special_tokens_to_add is not None),
-                                   model=self.model_instance.model_label)
+            self.metrics = Metrics(self.val_dataloader, self.exp_dir, ZWJ_Fix=getattr(self.model_instance, "zwj_fix", False), model=self.model_instance.model_label)
             final_val_loss, _ = self.validate()
             model_dir = self.save_model(epoch)
 
@@ -145,7 +144,7 @@ class AbstractSeqTrainer(AbstractTrainer):
         tokenizer = self.model_instance.tokenizer
 
         if self.special_tokens_to_add is not None:
-            tokenizer.add_special_tokens({'additional_special_tokens': self.special_tokens_to_add})
+            tokenizer.add_special_tokens({'additional_special_tokens': self.special_tokens_to_add}, replace_additional_special_tokens=False)
             model.resize_token_embeddings(len(tokenizer))
             self.accelerator.print("Added following special tokens:")
             for tok in self.special_tokens_to_add:
@@ -196,6 +195,7 @@ class AbstractSeqTrainer(AbstractTrainer):
             dataset_size=self.dataset_size,
             train_max_length=self.train_max_length,
             train_batch_size=self.train_batch_size,
+            zwj_fix=getattr(self.model_instance, "zwj_fix", False),
         )
 
         self.train_dataloader = dataloader.train_dataloader
@@ -263,6 +263,10 @@ class AbstractSeqTrainer(AbstractTrainer):
         else:
             if self.accelerator.is_main_process:
                 raise AssertionError(f"Unsupported zero stage: {self.zero_stage}")
+
+        # Save the tokenizer with the weights
+        if self.accelerator.is_main_process:
+            self.model_instance.tokenizer.save_pretrained(model_dir)
 
         self.accelerator.save(self.optimizer.state_dict(), os.path.join(self.exp_dir, 'optimizer.pt'))
         self.accelerator.save(self.lr_scheduler.state_dict(), os.path.join(self.exp_dir, 'scheduler.pt'))

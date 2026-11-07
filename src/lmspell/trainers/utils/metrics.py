@@ -11,9 +11,13 @@ from lmspell.utils.pre_post_processing_utils import PrePostProcessingUtils
 
 
 class Metrics:
-    # ZWJ_Fix is currently ignored (known issue C4).
-    def __init__(self, data_loader: DataLoader, exp_dir: str, ZWJ_Fix: bool = False,  # pylint: disable=unused-argument
-                 model: ModelEnum = ModelEnum.MBART50):
+    def __init__(
+        self, 
+        data_loader: DataLoader, 
+        exp_dir: str, 
+        ZWJ_Fix: bool = False,
+        model: ModelEnum = ModelEnum.MBART50
+    ):
         print("Initializing Metrics")
         self.detection_keys = [
             'Detection Accuracy',
@@ -43,7 +47,7 @@ class Metrics:
         }
 
         self.loss = 0
-        self.ZWJ_Fix = model in [ModelEnum.MBART50, ModelEnum.MT5_BASE, ModelEnum.MT5_XL]
+        self.ZWJ_Fix = ZWJ_Fix
         self.model = model
         self.original_sentences = []
         self.predicted_sentences = []

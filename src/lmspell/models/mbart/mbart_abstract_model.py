@@ -16,6 +16,7 @@ class MbartAbstractModel(EncoderDecoderAbstract):
         lang_code = MBART50_LANG_CODE.get(self.language.lower(), MBART50_LANG_CODE["english"])
         self.tokenizer = MBart50TokenizerFast.from_pretrained(model_path, src_lang=lang_code, tgt_lang=lang_code)
         self.model.to(self.device)
+        self.enable_zwj_fix("mbart")
 
     def load_model(self):
         pass

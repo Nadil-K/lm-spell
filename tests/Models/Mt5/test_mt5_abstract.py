@@ -108,3 +108,25 @@ def test_correct_from_csv_without_target_column(fake_mt5, isolated_cwd):
     with patch.object(fake_mt5, "correct") as correct:
         fake_mt5.correctFromFile(str(isolated_cwd / "only_text.csv"))
     assert correct.call_args[0][:2] == (["a b"], None)
+
+
+ZWJ_WORD = "ශ්‍රී"
+
+
+def test_zwj_is_tokenized_as_a_token_and_restored(fake_mt5, isolated_cwd):  # pylint: disable=unused-argument
+    results = fake_mt5.correct([ZWJ_WORD], [ZWJ_WORD], max_length=8)
+
+    assert fake_mt5.zwj_fix
+    assert "<ZWJ>" in fake_mt5.tokenizer.vocab              # registered as a token
+    assert "ශ්<ZWJ>රී" in fake_mt5.tokenizer.vocab           # input was converted before tokenizing
+    assert results["Corrected"].tolist() == [ZWJ_WORD]       # and turned back into U+200D
+
+
+def test_zwj_fix_can_be_turned_off(fake_tokenizer, fake_seq2seq_model, isolated_cwd):
+    (isolated_cwd / "LMSpellConfig.json").write_text('{"fix_zwj": {"mt5": false}}', encoding="utf-8")
+    with patch(f"{MT5}.MT5ForConditionalGeneration.from_pretrained", return_value=fake_seq2seq_model),          patch(f"{MT5}.T5TokenizerFast.from_pretrained", return_value=fake_tokenizer):
+        model = Mt5LargeModel()
+
+    model.correct([ZWJ_WORD], max_length=8)
+    assert not model.zwj_fix
+    assert "<ZWJ>" not in fake_tokenizer.vocab
